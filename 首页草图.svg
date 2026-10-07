@@ -1,0 +1,131 @@
+<svg width="100%" viewBox="0 0 680 532" xmlns="http://www.w3.org/2000/svg" role="img" font-family="var(--font-sans, 'PingFang SC', 'Microsoft YaHei', sans-serif)">
+<title>每日营养与热量记录网页首页线框草图</title>
+<desc>首页由页头、个人信息条、左列录入区（饮食录入、运动记录）与右列今日总结区组成。</desc>
+
+<rect x="8" y="8" width="664" height="504" rx="12" fill="var(--color-background-primary, #FFFFFF)" stroke="var(--color-border-tertiary, #E3E6DF)" stroke-width="0.5"/>
+
+<text x="24" y="38" font-size="15" font-weight="500" fill="var(--color-text-primary, #1D211C)">每日营养与热量记录</text>
+<text x="24" y="54" font-size="11" fill="var(--color-text-tertiary, #9A9D96)">选食材 + 选做法，自动算出这道菜的热量与营养</text>
+<text x="656" y="34" font-size="12" fill="var(--color-text-secondary, #6B6E68)" text-anchor="end">10月7日 星期三</text>
+<text x="656" y="52" font-size="11" fill="var(--color-text-tertiary, #9A9D96)" text-anchor="end">记录保存在本机</text>
+<line x1="24" y1="66" x2="656" y2="66" stroke="var(--color-border-tertiary, #E3E6DF)" stroke-width="0.5"/>
+
+<rect x="20" y="76" width="640" height="52" rx="10" fill="var(--color-background-secondary, #FAFAF7)" stroke="var(--color-border-tertiary, #E3E6DF)" stroke-width="0.5"/>
+<text x="32" y="92" font-size="11" fill="var(--color-text-tertiary, #9A9D96)">性别</text>
+<text x="100" y="92" font-size="11" fill="var(--color-text-tertiary, #9A9D96)">年龄</text>
+<text x="168" y="92" font-size="11" fill="var(--color-text-tertiary, #9A9D96)">身高</text>
+<text x="236" y="92" font-size="11" fill="var(--color-text-tertiary, #9A9D96)">体重</text>
+<text x="304" y="92" font-size="11" fill="var(--color-text-tertiary, #9A9D96)">活动水平</text>
+<rect x="32" y="98" width="62" height="22" rx="6" fill="var(--color-background-primary, #FFFFFF)" stroke="var(--color-border-tertiary, #E3E6DF)" stroke-width="0.5"/>
+<text x="42" y="114" font-size="11" fill="var(--color-text-primary, #1D211C)">男</text>
+<rect x="100" y="98" width="62" height="22" rx="6" fill="var(--color-background-primary, #FFFFFF)" stroke="var(--color-border-tertiary, #E3E6DF)" stroke-width="0.5"/>
+<text x="110" y="114" font-size="11" fill="var(--color-text-primary, #1D211C)">30</text>
+<rect x="168" y="98" width="62" height="22" rx="6" fill="var(--color-background-primary, #FFFFFF)" stroke="var(--color-border-tertiary, #E3E6DF)" stroke-width="0.5"/>
+<text x="178" y="114" font-size="11" fill="var(--color-text-primary, #1D211C)">170 cm</text>
+<rect x="236" y="98" width="62" height="22" rx="6" fill="var(--color-background-primary, #FFFFFF)" stroke="var(--color-border-tertiary, #E3E6DF)" stroke-width="0.5"/>
+<text x="246" y="114" font-size="11" fill="var(--color-text-primary, #1D211C)">65 kg</text>
+<rect x="304" y="98" width="72" height="22" rx="6" fill="var(--color-background-primary, #FFFFFF)" stroke="var(--color-border-tertiary, #E3E6DF)" stroke-width="0.5"/>
+<text x="314" y="114" font-size="11" fill="var(--color-text-primary, #1D211C)">中度活动</text>
+<line x1="560" y1="88" x2="560" y2="118" stroke="var(--color-border-tertiary, #E3E6DF)" stroke-width="0.5"/>
+<text x="648" y="92" font-size="11" fill="var(--color-text-tertiary, #9A9D96)" text-anchor="end">今日建议摄入量</text>
+<text x="648" y="117" font-size="19" font-weight="500" fill="#3F6F46" text-anchor="end">2 100 kcal</text>
+
+<rect x="20" y="138" width="404" height="228" rx="10" fill="var(--color-background-primary, #FFFFFF)" stroke="var(--color-border-tertiary, #E3E6DF)" stroke-width="0.5"/>
+<text x="34" y="160" font-size="13" font-weight="500" fill="var(--color-text-primary, #1D211C)">饮食录入</text>
+<rect x="272" y="146" width="70" height="22" rx="7" fill="#3F6F46"/>
+<text x="307" y="161" font-size="11" fill="#FFFFFF" text-anchor="middle">直接记录</text>
+<rect x="346" y="146" width="70" height="22" rx="7" fill="var(--color-background-tertiary, #F1EFE8)" stroke="var(--color-border-tertiary, #E3E6DF)" stroke-width="0.5"/>
+<text x="381" y="161" font-size="11" fill="var(--color-text-secondary, #6B6E68)" text-anchor="middle">搭配烹饪</text>
+
+<text x="34" y="188" font-size="11" fill="var(--color-text-secondary, #6B6E68)">记入餐次：午餐</text>
+<rect x="34" y="197" width="376" height="26" rx="7" fill="var(--color-background-secondary, #FAFAF7)" stroke="var(--color-border-tertiary, #E3E6DF)" stroke-width="0.5"/>
+<circle cx="50" cy="210" r="5" fill="none" stroke="var(--color-text-tertiary, #9A9D96)" stroke-width="1"/>
+<text x="62" y="214" font-size="11" fill="var(--color-text-tertiary, #9A9D96)">搜索食物，支持别名：西红柿 / 马铃薯 / 芫荽</text>
+
+<rect x="34" y="229" width="376" height="50" rx="7" fill="var(--color-background-primary, #FFFFFF)" stroke="var(--color-border-tertiary, #E3E6DF)" stroke-width="0.5"/>
+<text x="46" y="246" font-size="11" fill="var(--color-text-primary, #1D211C)">方便面（油炸）</text>
+<rect x="150" y="235" width="38" height="16" rx="8" fill="#EAF3DE"/>
+<text x="169" y="247" font-size="11" fill="#3F6F46" text-anchor="middle">成品</text>
+<text x="398" y="246" font-size="11" fill="var(--color-text-secondary, #6B6E68)" text-anchor="end">472 kcal / 100g</text>
+<line x1="34" y1="254" x2="410" y2="254" stroke="var(--color-border-tertiary, #E3E6DF)" stroke-width="0.5"/>
+<text x="46" y="270" font-size="11" fill="var(--color-text-primary, #1D211C)">番茄</text>
+<rect x="82" y="259" width="38" height="16" rx="8" fill="#FAEEDA"/>
+<text x="101" y="271" font-size="11" fill="#854F0B" text-anchor="middle">食材</text>
+<text x="398" y="270" font-size="11" fill="var(--color-text-secondary, #6B6E68)" text-anchor="end">20 kcal / 100g</text>
+
+<text x="34" y="298" font-size="11" fill="var(--color-text-tertiary, #9A9D96)">今日饮食 · 午餐</text>
+<text x="34" y="318" font-size="12" font-weight="500" fill="var(--color-text-primary, #1D211C)">芹菜炒牛肉</text>
+<text x="34" y="333" font-size="11" fill="var(--color-text-tertiary, #9A9D96)">芹菜 50g · 牛肉 100g · 炒</text>
+<text x="410" y="318" font-size="13" font-weight="500" fill="var(--color-text-primary, #1D211C)" text-anchor="end">192 kcal</text>
+<line x1="34" y1="344" x2="410" y2="344" stroke="var(--color-border-tertiary, #E3E6DF)" stroke-width="0.5"/>
+<text x="34" y="360" font-size="12" fill="var(--color-text-primary, #1D211C)">方便面（油炸） 100g</text>
+<text x="410" y="360" font-size="13" font-weight="500" fill="var(--color-text-primary, #1D211C)" text-anchor="end">472 kcal</text>
+
+<rect x="20" y="376" width="404" height="122" rx="10" fill="var(--color-background-primary, #FFFFFF)" stroke="var(--color-border-tertiary, #E3E6DF)" stroke-width="0.5"/>
+<text x="34" y="398" font-size="13" font-weight="500" fill="var(--color-text-primary, #1D211C)">运动记录</text>
+<text x="410" y="398" font-size="11" fill="var(--color-text-tertiary, #9A9D96)" text-anchor="end">按体重与强度估算消耗</text>
+<rect x="34" y="408" width="150" height="26" rx="7" fill="var(--color-background-secondary, #FAFAF7)" stroke="var(--color-border-tertiary, #E3E6DF)" stroke-width="0.5"/>
+<text x="46" y="425" font-size="11" fill="var(--color-text-primary, #1D211C)">快走</text>
+<rect x="192" y="408" width="50" height="26" rx="7" fill="var(--color-background-secondary, #FAFAF7)" stroke="var(--color-border-tertiary, #E3E6DF)" stroke-width="0.5"/>
+<text x="204" y="425" font-size="11" fill="var(--color-text-primary, #1D211C)">30</text>
+<text x="250" y="425" font-size="11" fill="var(--color-text-tertiary, #9A9D96)">分钟</text>
+<rect x="282" y="408" width="64" height="26" rx="7" fill="#3F6F46"/>
+<text x="314" y="425" font-size="11" fill="#FFFFFF" text-anchor="middle">添加</text>
+<line x1="34" y1="448" x2="410" y2="448" stroke="var(--color-border-tertiary, #E3E6DF)" stroke-width="0.5"/>
+<text x="34" y="466" font-size="12" fill="var(--color-text-primary, #1D211C)">快走 30 分钟</text>
+<text x="410" y="466" font-size="13" font-weight="500" fill="#A32D2D" text-anchor="end">- 105 kcal</text>
+<text x="34" y="488" font-size="12" fill="var(--color-text-primary, #1D211C)">力量训练 45 分钟</text>
+<text x="410" y="488" font-size="13" font-weight="500" fill="#A32D2D" text-anchor="end">- 230 kcal</text>
+
+<rect x="436" y="138" width="224" height="360" rx="10" fill="var(--color-background-primary, #FFFFFF)" stroke="var(--color-border-tertiary, #E3E6DF)" stroke-width="0.5"/>
+<text x="448" y="160" font-size="13" font-weight="500" fill="var(--color-text-primary, #1D211C)">今日总结</text>
+<text x="648" y="160" font-size="11" fill="var(--color-text-tertiary, #9A9D96)" text-anchor="end">共 3 条记录</text>
+
+<circle cx="482" cy="214" r="36" fill="none" stroke="var(--color-border-tertiary, #E3E6DF)" stroke-width="9"/>
+<circle cx="482" cy="214" r="36" fill="none" stroke="#3F6F46" stroke-width="9" stroke-linecap="round" stroke-dasharray="226.2" stroke-dashoffset="36" transform="rotate(-90 482 214)"/>
+<text x="482" y="212" font-size="15" font-weight="500" fill="var(--color-text-primary, #1D211C)" text-anchor="middle">1 760</text>
+<text x="482" y="228" font-size="11" fill="var(--color-text-tertiary, #9A9D96)" text-anchor="middle">kcal</text>
+
+<text x="530" y="182" font-size="11" fill="var(--color-text-secondary, #6B6E68)">进食摄入</text>
+<text x="648" y="182" font-size="11" font-weight="500" fill="var(--color-text-primary, #1D211C)" text-anchor="end">1 760 kcal</text>
+<text x="530" y="204" font-size="11" fill="var(--color-text-secondary, #6B6E68)">运动消耗</text>
+<text x="648" y="204" font-size="11" font-weight="500" fill="#A32D2D" text-anchor="end">- 335 kcal</text>
+<text x="530" y="226" font-size="11" fill="var(--color-text-secondary, #6B6E68)">净摄入</text>
+<text x="648" y="226" font-size="11" font-weight="500" fill="var(--color-text-primary, #1D211C)" text-anchor="end">1 425 kcal</text>
+<text x="530" y="248" font-size="11" fill="var(--color-text-secondary, #6B6E68)">建议摄入</text>
+<text x="648" y="248" font-size="11" font-weight="500" fill="#854F0B" text-anchor="end">2 100 kcal</text>
+
+<rect x="448" y="270" width="200" height="40" rx="9" fill="#EAF3DE"/>
+<text x="458" y="288" font-size="11" font-weight="500" fill="#27500A">今日热量存在缺口</text>
+<text x="458" y="303" font-size="11" fill="#27500A">比建议摄入少 675 kcal（约 -32%）</text>
+
+<text x="448" y="330" font-size="11" fill="var(--color-text-tertiary, #9A9D96)">营养素摄入 vs 建议</text>
+
+<text x="448" y="348" font-size="11" fill="var(--color-text-primary, #1D211C)">蛋白质</text>
+<text x="648" y="348" font-size="11" fill="var(--color-text-secondary, #6B6E68)" text-anchor="end">74 / 79 g</text>
+<rect x="448" y="355" width="200" height="6" rx="3" fill="var(--color-background-tertiary, #F1EFE8)"/>
+<rect x="448" y="355" width="188" height="6" rx="3" fill="#3F6F46"/>
+
+<text x="448" y="374" font-size="11" fill="var(--color-text-primary, #1D211C)">脂肪</text>
+<text x="648" y="374" font-size="11" fill="var(--color-text-secondary, #6B6E68)" text-anchor="end">72 / 58 g</text>
+<rect x="448" y="381" width="200" height="6" rx="3" fill="var(--color-background-tertiary, #F1EFE8)"/>
+<rect x="448" y="381" width="200" height="6" rx="3" fill="#A32D2D"/>
+
+<text x="448" y="400" font-size="11" fill="var(--color-text-primary, #1D211C)">碳水化合物</text>
+<text x="648" y="400" font-size="11" fill="var(--color-text-secondary, #6B6E68)" text-anchor="end">210 / 302 g</text>
+<rect x="448" y="407" width="200" height="6" rx="3" fill="var(--color-background-tertiary, #F1EFE8)"/>
+<rect x="448" y="407" width="140" height="6" rx="3" fill="#3F6F46"/>
+
+<text x="448" y="426" font-size="11" fill="var(--color-text-primary, #1D211C)">膳食纤维</text>
+<text x="648" y="426" font-size="11" fill="var(--color-text-secondary, #6B6E68)" text-anchor="end">16 / 25 g</text>
+<rect x="448" y="433" width="200" height="6" rx="3" fill="var(--color-background-tertiary, #F1EFE8)"/>
+<rect x="448" y="433" width="128" height="6" rx="3" fill="#854F0B"/>
+
+<text x="448" y="452" font-size="11" fill="var(--color-text-primary, #1D211C)">钠</text>
+<text x="648" y="452" font-size="11" fill="var(--color-text-secondary, #6B6E68)" text-anchor="end">2 460 / 2 000 mg</text>
+<rect x="448" y="459" width="200" height="6" rx="3" fill="var(--color-background-tertiary, #F1EFE8)"/>
+<rect x="448" y="459" width="200" height="6" rx="3" fill="#A32D2D"/>
+
+<line x1="448" y1="476" x2="648" y2="476" stroke="var(--color-border-tertiary, #E3E6DF)" stroke-width="0.5"/>
+<text x="448" y="490" font-size="11" fill="var(--color-text-tertiary, #9A9D96)">未记录时显示「暂无数据」</text>
+</svg>

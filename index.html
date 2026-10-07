@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>每日营养与热量记录</title>
+<style>
+  :root{
+    --bg:#f6f6f1;
+    --surface:#ffffff;
+    --ink:#1d211c;
+    --ink-2:#5c635a;
+    --ink-3:#8b9188;
+    --line:#e6e6de;
+    --accent:#3f6f46;
+    --accent-soft:#e7efe6;
+    --burn:#c96f4a;
+    --burn-soft:#f6e9e2;
+    --warn:#b98a2e;
+    --warn-soft:#f7efdd;
+    --danger:#b5432f;
+    --danger-soft:#f7e5e0;
+    --radius:20px;
+    --font:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Source Han Sans SC",sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--font);
+    background:var(--bg);
+    color:var(--ink);
+    min-height:100dvh;
+    font-size:15px;
+    line-height:1.6;
+  }
+  ::selection{background:var(--accent-soft)}
+
+  .wrap{max-width:1200px;margin:0 auto;padding:0 24px 80px}
+
+  /* ---------- header ---------- */
+  header{
+    display:flex;align-items:flex-end;justify-content:space-between;
+    padding:40px 0 28px;border-bottom:1px solid var(--line);margin-bottom:32px;
+  }
+  .brand{display:flex;align-items:center;gap:14px}
+  .brand-mark{
+    width:44px;height:44px;border-radius:14px;background:var(--accent);
+    display:grid;place-items:center;flex-shrink:0;
+  }
+  .brand-mark svg{width:24px;height:24px;stroke:#fff}
+  .brand h1{font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1.3}
+  .brand p{font-size:13px;color:var(--ink-3)}
+  .today{text-align:right}
+  .today .date{font-size:20px;font-weight:600;letter-spacing:-.01em}
+  .today .tip{font-size:13px;color:var(--ink-3)}
+
+  /* ---------- profile ---------- */
+  .profile{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:22px 26px;margin-bottom:24px;
+    display:flex;gap:28px;align-items:center;flex-wrap:wrap;
+  }
+  .profile-fields{display:flex;gap:18px;flex-wrap:wrap;flex:1;min-width:0}
+  .field{display:flex;flex-direction:column;gap:4px}
+  .field label{font-size:12px;color:var(--ink-3);font-weight:500}
+  .field input,.field select{
+    font-family:var(--font);font-size:14px;color:var(--ink);
+    border:1px solid var(--line);border-radius:10px;padding:8px 12px;
+    background:#fbfbf8;min-width:76px;outline:none;transition:border-color .15s;
+  }
+  .field input:focus,.field select:focus{border-color:var(--accent)}
+  .seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fbfbf8}
+  .seg button{
+    font-family:var(--font);font-size:14px;padding:8px 16px;border:none;background:transparent;
+    color:var(--ink-2);cursor:pointer;transition:all .15s;
+  }
+  .seg button.on{background:var(--accent);color:#fff}
+  .tdee-box{
+    text-align:right;padding-left:28px;border-left:1px solid var(--line);flex-shrink:0;
+  }
+  .tdee-box .num{font-size:30px;font-weight:700;letter-spacing:-.02em;color:var(--accent)}
+  .tdee-box .num small{font-size:14px;font-weight:500;color:var(--ink-3);margin-left:2px}
+  .tdee-box .cap{font-size:12px;color:var(--ink-3)}
+
+  /* ---------- main grid ---------- */
+  .grid{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:24px;align-items:start}
+
+  .card{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:26px;box-shadow:0 1px 2px rgba(29,33,28,.03);
+  }
+  .card + .card{margin-top:24px}
+  .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+  .card-head h2{font-size:17px;font-weight:700;letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
+  .card-head h2 svg{width:19px;height:19px;stroke:var(--accent)}
+  .card-head .hint{font-size:12px;color:var(--ink-3)}
+
+  /* ---------- food search ---------- */
+  .search-row{display:flex;gap:10px;margin-bottom:14px}
+  .search-box{position:relative;flex:1}
+  .search-box svg{
+    position:absolute;left:13px;top:50%;transform:translateY(-50%);
+    width:16px;height:16px;stroke:var(--ink-3);pointer-events:none;
+  }
+  .search-box input{
+    width:100%;font-family:var(--font);font-size:14px;
+    border:1px solid var(--line);border-radius:12px;padding:10px 12px 10px 38px;
+    background:#fbfbf8;outline:none;transition:border-color .15s;
+  }
+  .search-box input:focus{border-color:var(--accent)}
+  .search-box input::placeholder{color:var(--ink-3)}
+  .meal-select{
+    font-family:var(--font);font-size:14px;border:1px solid var(--line);border-radius:12px;
+    padding:10px 12px;background:#fbfbf8;color:var(--ink);outline:none;cursor:pointer;
+  }
+  .suggestions{
+    border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:14px;
+    max-height:264px;overflow-y:auto;display:none;background:var(--surface);
+  }
+  .suggestions.open{display:block}
+  .sug-item{
+    display:flex;align-items:center;gap:12px;padding:11px 16px;cursor:pointer;
+    border-bottom:1px solid var(--line);transition:background .12s;
+  }
+  .sug-item:last-child{border-bottom:none}
+  .sug-item:hover,.sug-item:focus-visible{background:var(--accent-soft)}
+  .sug-item .name{font-weight:600;font-size:14px}
+  .sug-item .cat{font-size:11px;color:var(--ink-3);border:1px solid var(--line);border-radius:20px;padding:1px 8px}
+  .sug-item .per{margin-left:auto;text-align:right;flex-shrink:0}
+  .sug-item .per b{font-size:14px}
+  .sug-item .per span{font-size:11px;color:var(--ink-3)}
+  .no-result{padding:14px 16px;font-size:13px;color:var(--ink-3)}
+
+  /* ---------- logged lists ---------- */
+  .list-title{font-size:12px;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;margin:20px 0 8px}
+  .log-item{
+    display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--line);
+    animation:fadeUp .25s cubic-bezier(.16,1,.3,1);
+  }
+  @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .log-item .name{font-weight:600;font-size:14px}
+  .log-item .tag{font-size:11px;padding:2px 9px;border-radius:20px;flex-shrink:0;font-weight:500}
+  .tag.breakfast{background:var(--warn-soft);color:var(--warn)}
+  .tag.lunch{background:var(--accent-soft);color:var(--accent)}
+  .tag.dinner{background:#e8ecf4;color:#4a6289}
+  .tag.snack{background:var(--burn-soft);color:var(--burn)}
+  .tag.exercise{background:var(--burn-soft);color:var(--burn)}
+  .num-input{
+    font-family:var(--font);font-size:13px;width:72px;text-align:right;
+    border:1px solid var(--line);border-radius:8px;padding:5px 8px;background:#fbfbf8;outline:none;
+  }
+  .num-input:focus{border-color:var(--accent)}
+  .unit{font-size:12px;color:var(--ink-3);flex-shrink:0}
+  .log-item .kcal{margin-left:auto;font-weight:700;font-size:14px;flex-shrink:0;font-variant-numeric:tabular-nums}
+  .log-item .kcal.burn{color:var(--burn)}
+  .del{
+    width:28px;height:28px;border-radius:8px;border:none;background:transparent;cursor:pointer;
+    display:grid;place-items:center;flex-shrink:0;transition:background .12s;
+  }
+  .del:hover{background:var(--danger-soft)}
+  .del svg{width:14px;height:14px;stroke:var(--ink-3)}
+  .del:hover svg{stroke:var(--danger)}
+  .empty{
+    padding:26px 16px;text-align:center;color:var(--ink-3);font-size:13px;
+    border:1px dashed var(--line);border-radius:14px;
+  }
+
+  /* ---------- summary column ---------- */
+  .summary{position:sticky;top:24px}
+  .summary .card{padding:28px}
+  .donut-wrap{display:flex;align-items:center;gap:22px;margin-bottom:6px}
+  .donut{position:relative;width:150px;height:150px;flex-shrink:0}
+  .donut svg{transform:rotate(-90deg)}
+  .donut .track{stroke:var(--line)}
+  .donut .bar{stroke:var(--accent);transition:stroke-dashoffset .6s cubic-bezier(.16,1,.3,1),stroke .3s}
+  .donut .bar.over{stroke:var(--danger)}
+  .donut-center{
+    position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  }
+  .donut-center b{font-size:26px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .donut-center span{font-size:11px;color:var(--ink-3)}
+  .cal-facts{flex:1;min-width:0}
+  .fact{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:1px dashed var(--line)}
+  .fact:last-child{border-bottom:none}
+  .fact .k{font-size:13px;color:var(--ink-2);display:flex;align-items:center;gap:7px}
+  .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .fact .v{font-weight:700;font-size:15px;font-variant-numeric:tabular-nums}
+  .fact .v small{font-weight:500;color:var(--ink-3);font-size:11px;margin-left:1px}
+
+  .verdict{
+    margin:16px 0 20px;padding:14px 16px;border-radius:14px;font-size:13.5px;line-height:1.55;
+  }
+  .verdict b{font-size:15px}
+  .verdict.balanced{background:var(--accent-soft);color:#2c5233}
+  .verdict.surplus{background:var(--danger-soft);color:var(--danger)}
+  .verdict.deficit{background:var(--warn-soft);color:#8a651f}
+
+  .nutri-title{
+    font-size:12px;font-weight:600;color:var(--ink-3);letter-spacing:.08em;
+    margin-bottom:12px;padding-top:16px;border-top:1px solid var(--line);
+  }
+  .nutri{margin-bottom:15px}
+  .nutri-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+  .nutri-row .n{font-size:13.5px;font-weight:600}
+  .nutri-row .r{font-size:11px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+  .nutri-row .r b{color:var(--ink);font-size:12.5px}
+  .bar-track{height:7px;border-radius:10px;background:var(--line);overflow:hidden}
+  .bar-fill{
+    height:100%;border-radius:10px;background:var(--accent);
+    transition:width .6s cubic-bezier(.16,1,.3,1);
+    max-width:100%;
+  }
+  .bar-fill.warn{background:var(--warn)}
+  .bar-fill.danger{background:var(--danger)}
+  .pill{
+    display:inline-block;font-size:11px;font-weight:600;border-radius:20px;padding:1px 9px;margin-left:8px;vertical-align:1px;
+  }
+  .pill.ok{background:var(--accent-soft);color:var(--accent)}
+  .pill.low{background:var(--warn-soft);color:#8a651f}
+  .pill.high{background:var(--danger-soft);color:var(--danger)}
+
+  .foot-note{
+    margin-top:20px;padding-top:16px;border-top:1px solid var(--line);
+    font-size:12px;color:var(--ink-3);line-height:1.7;
+  }
+  .build{
+    margin-top:12px;padding-top:10px;border-top:1px dashed var(--line);
+    font-size:11.5px;color:var(--ink-3);line-height:1.6;
+  }
+  .env-warn{
+    display:flex;gap:10px;align-items:flex-start;background:var(--danger-soft);color:var(--danger);
+    border:1px solid rgba(181,67,47,.28);border-radius:14px;padding:12px 16px;margin:20px 0 0;
+    font-size:13px;line-height:1.6;font-weight:500;
+  }
+  .env-warn[hidden]{display:none}
+
+  /* ---------- 模式切换 ---------- */
+  .tabs{display:flex;gap:4px;background:#f2f2ec;border:1px solid var(--line);border-radius:12px;padding:3px}
+  .tab{font-family:var(--font);font-size:13px;font-weight:600;color:var(--ink-2);border:none;background:transparent;border-radius:9px;padding:6px 14px;cursor:pointer;transition:all .15s;white-space:nowrap}
+  .tab.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(29,33,28,.08)}
+  .meal-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .meal-row .lab{font-size:12px;color:var(--ink-3);font-weight:600;letter-spacing:.06em}
+  .type-badge{font-size:10.5px;padding:1px 7px;border-radius:20px;font-weight:600;flex-shrink:0}
+  .type-badge.dish{background:var(--accent-soft);color:var(--accent)}
+  .type-badge.ing{background:var(--warn-soft);color:#8a651f}
+  .sug-alias{font-size:11px;color:var(--ink-3);margin-left:6px}
+
+  /* ---------- 食材篮子 ---------- */
+  .basket{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+  .chip{display:flex;align-items:center;gap:8px;background:#f4f6f2;border:1px solid var(--line);border-radius:12px;padding:6px 8px 6px 12px;animation:fadeUp .2s cubic-bezier(.16,1,.3,1)}
+  .chip .cname{font-size:13px;font-weight:600}
+  .chip input{width:58px;font-family:var(--font);font-size:13px;text-align:right;border:1px solid var(--line);border-radius:7px;padding:3px 6px;background:#fff;outline:none}
+  .chip input:focus{border-color:var(--accent)}
+  .chip .x{border:none;background:transparent;cursor:pointer;padding:2px;display:grid;place-items:center;border-radius:6px}
+  .chip .x:hover{background:var(--danger-soft)}
+  .chip .x svg{width:12px;height:12px;stroke:var(--ink-3)}
+  .chip .x:hover svg{stroke:var(--danger)}
+
+  /* ---------- 工艺选择 ---------- */
+  .methods{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:8px}
+  .method{font-family:var(--font);text-align:left;border:1px solid var(--line);background:#fbfbf8;border-radius:12px;padding:9px 12px;cursor:pointer;transition:all .15s;color:var(--ink-2)}
+  .method b{display:block;font-size:13.5px;color:var(--ink);font-weight:600}
+  .method span{font-size:10.5px;color:var(--ink-3)}
+  .method.on{border-color:var(--accent);background:var(--accent-soft)}
+  .method.on b{color:var(--accent)}
+
+  .season-row{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+  .season-row label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--ink-3)}
+  .season-row input{font-family:var(--font);font-size:14px;width:80px;border:1px solid var(--line);border-radius:10px;padding:7px 10px;background:#fbfbf8;outline:none;text-align:right}
+  .season-row input:focus{border-color:var(--accent)}
+  .season-note{font-size:11.5px;color:var(--ink-3);line-height:1.5;max-width:360px;padding-top:16px}
+
+  /* ---------- 预览 ---------- */
+  .preview{background:#f7f8f5;border:1px solid var(--line);border-radius:16px;padding:16px 18px;margin-bottom:16px}
+  .preview .pname{font-size:16px;font-weight:700;letter-spacing:-.01em;margin-bottom:2px}
+  .preview .pmeta{font-size:12px;color:var(--ink-3);margin-bottom:12px}
+  .preview .pkcal{display:flex;align-items:baseline;gap:8px;margin-bottom:10px}
+  .preview .pkcal b{font-size:28px;letter-spacing:-.02em;color:var(--accent);font-variant-numeric:tabular-nums}
+  .preview .pkcal span{font-size:12px;color:var(--ink-3)}
+  .pstats{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:12.5px;color:var(--ink-2)}
+  .pstats i{font-style:normal;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+  .btn-primary{font-family:var(--font);font-size:14px;font-weight:600;color:#fff;background:var(--accent);border:1px solid var(--accent);border-radius:12px;padding:11px 22px;cursor:pointer;transition:transform .1s,filter .15s}
+  .btn-primary:hover{filter:brightness(1.07)}
+  .btn-primary:active{transform:scale(.98)}
+  .btn-primary:disabled{opacity:.45;cursor:not-allowed}
+  .btn-ghost{font-family:var(--font);font-size:14px;color:var(--ink-2);background:transparent;border:1px solid var(--line);border-radius:12px;padding:11px 18px;cursor:pointer}
+  .combo-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+  /* ---------- 记录条目 ---------- */
+  .meal-head{display:flex;justify-content:space-between;align-items:baseline;margin:20px 0 2px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  .meal-head .mname{font-size:13px;font-weight:700}
+  .meal-head .mkcal{font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+  .log-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+  .log-name{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .comp{font-size:11.5px;color:var(--ink-3);line-height:1.45}
+  .icon-btn{width:28px;height:28px;border-radius:8px;border:none;background:transparent;cursor:pointer;display:grid;place-items:center;flex-shrink:0;transition:background .12s}
+  .icon-btn:hover{background:var(--accent-soft)}
+  .icon-btn svg{width:14px;height:14px;stroke:var(--ink-3)}
+  .icon-btn:hover svg{stroke:var(--accent)}
+  .icon-btn.danger:hover{background:var(--danger-soft)}
+  .icon-btn.danger:hover svg{stroke:var(--danger)}
+  .tag.method{background:#eef0ec;color:var(--ink-2)}
+
+  button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width:960px){
+    .grid{grid-template-columns:1fr}
+    .summary{position:static}
+    .tdee-box{border-left:none;padding-left:0;text-align:left;border-top:1px solid var(--line);padding-top:14px;width:100%}
+    header{flex-direction:column;align-items:flex-start;gap:12px}
+    .today{text-align:left}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="env-warn" id="envWarn" role="alert" hidden></div>
+
+  <header>
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2v6M9 4l3 4 3-4"/>
+          <path d="M5 11a7 7 0 0 1 14 0c0 4-2 6-2 9H7c0-3-2-5-2-9z"/>
+        </svg>
+      </div>
+      <div>
+        <h1>每日营养与热量记录</h1>
+        <p>记录饮食与运动，即时估算营养摄入、热量平衡与建议对比</p>
+      </div>
+    </div>
+    <div class="today">
+      <div class="date" id="todayDate"></div>
+      <div class="tip" id="envTip">数据自动保存在本机浏览器中</div>
+    </div>
+  </header>
+
+  <!-- 个人信息 -->
+  <section class="profile" aria-label="个人信息">
+    <div class="profile-fields">
+      <div class="field">
+        <label id="genderLabel">性别</label>
+        <div class="seg" role="group" aria-labelledby="genderLabel">
+          <button type="button" id="gMale" class="on">男</button>
+          <button type="button" id="gFemale">女</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="age">年龄（岁）</label>
+        <input type="number" id="age" min="10" max="100" value="30">
+      </div>
+      <div class="field">
+        <label for="height">身高（cm）</label>
+        <input type="number" id="height" min="120" max="220" value="170">
+      </div>
+      <div class="field">
+        <label for="weight">体重（kg）</label>
+        <input type="number" id="weight" min="30" max="200" value="65">
+      </div>
+      <div class="field">
+        <label for="activity">日常活动水平</label>
+        <select id="activity">
+          <option value="1.2">久坐（很少运动）</option>
+          <option value="1.375">轻度活动（每周 1–3 次）</option>
+          <option value="1.55" selected>中度活动（每周 3–5 次）</option>
+          <option value="1.725">高强度（每周 6–7 次）</option>
+        </select>
+      </div>
+    </div>
+    <div class="tdee-box">
+      <div class="num" id="tdeeVal">—<small>kcal</small></div>
+      <div class="cap">今日建议摄入量（TDEE）</div>
+    </div>
+  </section>
+
+  <div class="grid">
+    <!-- 左列：录入 -->
+    <div>
+      <!-- 饮食 -->
+      <section class="card" aria-label="饮食记录">
+        <div class="card-head">
+          <h2>
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M7 3v8M5 3v4a2 2 0 0 0 4 0V3M7 11v10M17 3c-2 2-3 5-3 8h3v10M17 3v8"/>
+            </svg>
+            吃了什么
+          </h2>
+          <div class="tabs" role="tablist" aria-label="录入方式">
+            <button class="tab on" role="tab" aria-selected="true" data-mode="quick">单点 / 成品</button>
+            <button class="tab" role="tab" aria-selected="false" data-mode="combo">搭配烹饪</button>
+          </div>
+        </div>
+
+        <div class="meal-row">
+          <span class="lab">记到</span>
+          <select class="meal-select" id="mealSelect" aria-label="选择餐次">
+            <option value="breakfast">早餐</option>
+            <option value="lunch" selected>午餐</option>
+            <option value="dinner">晚餐</option>
+            <option value="snack">加餐</option>
+          </select>
+          <span class="hint">后续添加的条目都会归入该餐次</span>
+        </div>
+
+        <!-- 模式一：直接添加成品菜 / 饮品 / 水果等 -->
+        <div id="quickPanel">
+          <div class="search-row">
+            <div class="search-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+              <input type="text" id="foodSearch" placeholder="搜索食物或别名，如：西红柿、马铃薯、方便面、炸鸡……" autocomplete="off" aria-label="搜索食物">
+            </div>
+          </div>
+          <div class="suggestions" id="suggestions" role="listbox" aria-label="搜索结果"></div>
+          <p class="hint" style="margin-top:2px">
+            标「直接记录」的条目（成品菜、速食、饮品、水果）数值已含烹饪影响，点一下就能记录；标「搭配工艺」的生鲜食材点击后会自动进入「搭配烹饪」，让你选做法并计算用油用糖。
+          </p>
+        </div>
+
+        <!-- 模式二：多食材 + 工艺 -->
+        <div id="comboPanel" hidden>
+          <div class="list-title" style="margin-top:0">1 · 选择食材</div>
+          <div class="basket" id="basket"></div>
+          <div class="search-row">
+            <div class="search-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+              <input type="text" id="foodSearch2" placeholder="添加食材，如：芹菜、牛肉、胡萝卜……" autocomplete="off" aria-label="添加食材">
+            </div>
+          </div>
+          <div class="suggestions" id="suggestions2" role="listbox" aria-label="食材搜索结果"></div>
+
+          <div class="list-title">2 · 选择工艺</div>
+          <div class="methods" id="methods" role="radiogroup" aria-label="烹饪工艺"></div>
+
+          <div class="list-title">3 · 调味估算（自动填写，可修改）</div>
+          <div class="season-row">
+            <label>用油 <input type="number" id="oilG" min="0" max="200" step="0.5" value="0" aria-label="用油量（克）"></label>
+            <label>加糖 <input type="number" id="sugarG" min="0" max="200" step="0.5" value="0" aria-label="加糖量（克）"></label>
+            <label>盐 <input type="number" id="saltG" min="0" max="30" step="0.5" value="0" aria-label="食盐量（克）"></label>
+            <span class="season-note" id="seasonNote">按所选工艺和食材总重自动估算，可手动改成实际用量。</span>
+          </div>
+
+          <div class="preview" id="comboPreview"></div>
+
+          <div class="combo-actions">
+            <button class="btn-primary" id="comboAdd" type="button">加入今日记录</button>
+            <button class="btn-ghost" id="comboCancel" type="button" hidden>取消编辑</button>
+          </div>
+        </div>
+
+        <div class="list-title">今日饮食记录</div>
+        <div id="foodList"></div>
+      </section>
+
+      <!-- 运动 -->
+      <section class="card" aria-label="运动记录">
+        <div class="card-head">
+          <h2>
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 6v12M18 6v12M3 9v6M21 9v6M6 12h12"/>
+            </svg>
+            做了什么运动
+          </h2>
+          <span class="hint">消耗按体重与运动强度（MET）估算</span>
+        </div>
+
+        <div class="search-row">
+          <select class="meal-select" id="exerciseSelect" style="flex:1" aria-label="选择运动项目">
+            <option value="">选择运动项目……</option>
+          </select>
+          <div class="search-box" style="max-width:150px;position:relative">
+            <input type="number" id="exerciseMinutes" min="5" max="480" step="5" value="30" aria-label="运动时长（分钟）" style="padding-left:12px">
+          </div>
+          <span class="unit">分钟</span>
+          <button class="meal-select" id="addExercise" style="cursor:pointer;background:var(--burn);color:#fff;border-color:var(--burn);font-weight:600">添加</button>
+        </div>
+
+        <div class="list-title">已记录的运动</div>
+        <div id="exerciseList"></div>
+      </section>
+    </div>
+
+    <!-- 右列：结果 -->
+    <div class="summary">
+      <div class="card" aria-label="今日总结" aria-live="polite">
+        <div class="card-head">
+          <h2>今日总结</h2>
+          <span class="hint" id="logCount"></span>
+        </div>
+
+        <div class="donut-wrap">
+          <div class="donut" role="img" aria-label="热量摄入进度环">
+            <svg width="150" height="150" viewBox="0 0 150 150">
+              <circle class="track" cx="75" cy="75" r="64" fill="none" stroke-width="13"/>
+              <circle class="bar" id="donutBar" cx="75" cy="75" r="64" fill="none" stroke-width="13"
+                      stroke-linecap="round" stroke-dasharray="402.1" stroke-dashoffset="402.1"/>
+            </svg>
+            <div class="donut-center">
+              <b id="intakeTotal">0</b>
+              <span>摄入 kcal</span>
+            </div>
+          </div>
+          <div class="cal-facts">
+            <div class="fact">
+              <span class="k"><span class="dot" style="background:var(--accent)"></span>进食摄入</span>
+              <span class="v" id="fIntake">0<small>kcal</small></span>
+            </div>
+            <div class="fact">
+              <span class="k"><span class="dot" style="background:var(--burn)"></span>运动消耗</span>
+              <span class="v" id="fBurn" style="color:var(--burn)">0<small>kcal</small></span>
+            </div>
+            <div class="fact">
+              <span class="k"><span class="dot" style="background:var(--warn)"></span>其中调味（油 / 糖）估算</span>
+              <span class="v" id="fSeason" style="color:var(--warn)">+0<small>kcal</small></span>
+            </div>
+            <div class="fact">
+              <span class="k"><span class="dot" style="background:var(--ink-3)"></span>净摄入（摄入 − 消耗）</span>
+              <span class="v" id="fNet">0<small>kcal</small></span>
+            </div>
+            <div class="fact">
+              <span class="k"><span class="dot" style="background:var(--warn)"></span>建议摄入</span>
+              <span class="v" id="fTdee">—<small>kcal</small></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="verdict balanced" id="verdict">
+          <b>开始记录</b><br>在左侧添加今天吃的东西和运动，这里会给出热量平衡结论。
+        </div>
+
+        <div class="nutri-title">营养素摄入 vs 建议</div>
+        <div id="nutriList"></div>
+
+        <div class="foot-note">
+          <b style="color:var(--ink-2)">数据与估算说明</b><br>
+          · 食物营养数据取自《中国食物成分表》体系（与食安网「食物营养成分查询」同源），均为每 100 g 可食部数值。标「成品」的条目是烹饪后的成品菜 / 速食，数值已含烹饪影响，可直接记录。<br>
+          · 标「食材」的条目是生鲜原料。选好食材与工艺后，页面按工艺估算额外加入的油、糖、盐：油脂 9 kcal/g、糖 4 kcal/g、食盐 1 g ≈ 钠 393 mg。默认用量为每 100 g 食材的经验值（炒约 4 g 油、炸约 12 g 油、红烧约 5 g 油 + 6 g 糖），实际用油量可在页面里手动修正。<br>
+          · 食材重量按生重填写；煮、炖类菜品若连汤食用请按实际入口量估算；油炸、烤制过程水分流失不额外换算。<br>
+          · 运动消耗按 MET 公式（MET × 3.5 × 体重 ÷ 200 × 分钟）估算；建议摄入量由 Mifflin-St Jeor 公式结合活动水平计算，营养素供能比参考中国居民膳食营养素参考摄入量。结果仅供健康参考，不构成医疗建议。
+          <div class="build" id="buildStamp"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================= 运行环境自检 =================
+   放在脚本最前面：无论是本地文件（file://）还是网页服务（http://）打开，
+   都把运行环境与本地存储状态显示出来；脚本一旦出错直接显示在页面顶部，
+   避免「页面看起来正常但功能点了没反应」这种无从排查的情况。 */
+(function(){
+  var VER = "v2.2";
+  window.__APP_VERSION = VER;
+
+  var proto = (location.protocol || "").replace(":", "");
+  var envLabel = proto === "file" ? "本地文件 file://"
+               : (proto === "http" || proto === "https") ? proto + ":// 网页服务"
+               : (proto || "未知");
+
+  var storageOk = true;
+  try { localStorage.setItem("__probe__", "1"); localStorage.removeItem("__probe__"); }
+  catch (e) { storageOk = false; }
+  window.__STORAGE_OK = storageOk;
+
+  function banner(text){
+    var el = document.getElementById("envWarn");
+    if(!el) return;
+    el.hidden = false;
+    el.textContent = text;
+  }
+
+  window.addEventListener("error", function(ev){
+    banner("页面脚本执行出错：" + ((ev && ev.message) || "未知错误")
+      + "。如果这份文件刚更新过，请在 Edge 里按 Ctrl + F5 强制刷新，避免加载到旧的缓存版本。");
+  });
+  window.addEventListener("unhandledrejection", function(ev){
+    var r = ev && ev.reason;
+    banner("页面出现未处理的异常：" + ((r && r.message) || r || "未知错误"));
+  });
+
+  var painted = false;
+  function paint(){
+    if(painted) return; painted = true;
+    var tip = document.getElementById("envTip");
+    var stamp = document.getElementById("buildStamp");
+    if(!storageOk){
+      banner("⚠ 当前环境无法保存数据，记录刷新后会丢失。常见原因是浏览器处于无痕 / 隐私模式，"
+        + "或设置了「阻止所有 Cookie」。页面计算功能不受影响，建议换普通窗口打开。");
+      if(tip) tip.textContent = "本地存储不可用，记录不会被保存";
+    }
+    if(stamp){
+      stamp.textContent = VER + " · 运行环境：" + envLabel
+        + " · 本地存储：" + (storageOk ? "可用" : "不可用")
+        + " · 数据按「来源」分开保存，换一个来源（如从网页服务改为本地文件打开）记录不会自动带过来";
+    }
+  }
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", paint);
+  else paint();
+})();
+
+/* ================= 数据库 ================= */
+// 数据格式：[名称, 别名(| 分隔), 分类, 类型, 能量kcal, 蛋白质g, 脂肪g, 碳水g, 膳食纤维g, 钠mg]
+// 类型 d = 成品/可直接记录（数值已含烹饪影响）；i = 生鲜食材（需搭配工艺，另计用油/糖/盐）
+// 均为每 100g 可食部数值，参考《中国食物成分表》体系（与食安网食物营养成分查询同源）
+const RAW_A = [   // 谷薯 · 豆类
+  ["米饭（蒸）","白饭|大米饭|米饭|蒸米饭","谷薯","d",116,2.6,0.3,25.9,0.3,2.5],
+  ["大米（生）","稻米|白米|生米|粳米","谷薯","i",346,7.4,0.8,77.9,0.7,3.8],
+  ["小米（生）","粟米|谷子|黄小米","谷薯","i",361,9.0,3.1,75.1,1.6,4.3],
+  ["面粉（小麦粉）","白面|小麦粉|面粉|中筋面粉","谷薯","i",354,11.2,1.5,73.6,2.1,3.1],
+  ["馒头","馍|白馒头|蒸馍|馍馍","谷薯","d",223,7.0,1.1,47.0,1.3,165],
+  ["花卷","葱油花卷|葱花卷","谷薯","d",217,6.4,1.0,45.6,1.5,95],
+  ["面条（煮）","面|挂面|面条|煮面|面汤面","谷薯","d",110,3.9,0.4,22.8,0.4,84],
+  ["全麦面包","全麦吐司|全麦方包|黑麦面包","谷薯","d",246,10.4,3.4,45.6,7.0,400],
+  ["白面包","吐司|切片面包|方包|白吐司","谷薯","d",283,8.3,3.5,58.6,2.3,450],
+  ["燕麦片","麦片|燕麦|即食燕麦|燕麦米","谷薯","i",367,15.0,6.7,66.0,5.3,20],
+  ["玉米（鲜）","苞米|棒子|玉米棒|甜玉米|包谷","谷薯","i",112,4.0,1.2,22.8,2.9,1],
+  ["玉米面","苞米面|棒子面|玉米粉","谷薯","i",341,8.1,3.3,69.6,5.5,2.3],
+  ["白粥","稀饭|大米粥|白米粥","谷薯","d",46,1.1,0.3,9.9,0.1,2],
+  ["小米粥","小米稀饭","谷薯","d",46,1.4,0.7,8.4,0.4,2.5],
+  ["八宝粥","罐装八宝粥|杂粮粥","谷薯","d",85,2.5,1.2,16.5,1.2,60],
+  ["年糕","水磨年糕|韩式年糕","谷薯","d",154,3.3,0.6,34.7,0.8,56],
+  ["粽子（肉馅）","肉粽|粽子|咸粽","谷薯","d",200,5.0,7.0,29.0,0.9,400],
+  ["意大利面（煮）","意面|通心粉|意大利面|意粉","谷薯","d",158,5.8,0.9,30.9,1.8,180],
+  ["荞麦面（煮）","荞麦面条|饸饹面","谷薯","d",130,4.5,0.5,26.0,1.5,100],
+  ["米线（煮）","米粉|河粉|米线|粉条(煮)","谷薯","d",110,2.2,0.2,24.0,0.5,120],
+  ["红薯","地瓜|番薯|甘薯|山芋|红苕|白薯","谷薯","i",99,1.1,0.2,24.7,1.6,28],
+  ["紫薯","紫红薯|紫心地瓜|紫心番薯","谷薯","i",106,1.5,0.2,25.0,1.6,20],
+  ["土豆","马铃薯|洋芋|山药蛋|薯仔|洋山芋","谷薯","i",81,2.6,0.2,17.8,1.2,3],
+  ["山药","淮山|薯蓣|怀山药","谷薯","i",57,1.9,0.2,12.4,0.8,18],
+  ["芋头","芋艿|毛芋|芋仔","谷薯","i",79,2.2,0.2,18.1,1.0,33],
+  ["豆腐","白豆腐|水豆腐|北豆腐|老豆腐|豆付","豆类","i",82,8.1,3.7,4.2,0.4,7],
+  ["豆腐干","豆干|香干|白干|豆干丝","豆类","d",140,16.2,3.6,11.5,0.8,330],
+  ["腐竹","豆皮棒|支竹|腐竹皮","豆类","i",459,44.6,21.7,22.3,1.0,27],
+  ["豆浆","豆奶|黄豆浆|原味豆浆","豆类","d",31,3.0,1.6,1.2,1.1,3],
+  ["黄豆","大豆|黄大豆|青大豆","豆类","i",390,35.0,16.0,34.2,15.5,2.2],
+  ["红豆","赤小豆|小豆|红小豆","豆类","i",324,20.2,0.6,63.4,7.7,2.2],
+  ["绿豆","青小豆|青豆(干)","豆类","i",329,21.6,0.8,62.0,6.4,3.2],
+  ["毛豆","青豆|枝豆|毛豆荚","豆类","i",131,13.1,5.0,10.5,4.0,3.9],
+  ["黄豆芽","大豆芽|豆芽|黄芽菜(豆芽)","蔬菜","i",44,4.5,1.6,4.5,1.5,7.2],
+  ["绿豆芽","豆芽菜|银芽","蔬菜","i",18,2.1,0.1,2.9,0.8,4.4],
+];
+
+const RAW_B = [   // 蔬菜 · 菌藻 · 水果 · 坚果
+  ["大白菜","白菜|黄芽菜|结球白菜|胶菜","蔬菜","i",18,1.5,0.2,3.2,0.8,68],
+  ["圆白菜","卷心菜|包菜|甘蓝|绿甘蓝|洋白菜","蔬菜","i",24,1.5,0.2,4.6,1.0,27],
+  ["菠菜","赤根菜|波斯草|鹦鹉菜","蔬菜","i",28,2.6,0.3,4.5,1.7,85],
+  ["生菜","莴苣叶|叶用莴苣|鹅仔菜|生菜叶","蔬菜","i",16,1.3,0.3,2.0,0.7,32],
+  ["芹菜","旱芹|药芹|西芹|香芹","蔬菜","i",20,1.2,0.2,4.5,1.2,159],
+  ["香菜","芫荽|胡荽|盐荽|香菜叶","蔬菜","i",33,1.8,0.4,6.9,1.2,48],
+  ["韭菜","起阳草|长生韭|懒人菜","蔬菜","i",26,2.4,0.4,4.6,1.4,8.1],
+  ["西兰花","绿菜花|青花菜|绿花椰菜|西蓝花","蔬菜","i",36,4.1,0.6,4.3,1.6,18],
+  ["花菜","白花菜|菜花|花椰菜|白花椰菜","蔬菜","i",24,2.1,0.2,4.6,1.2,31],
+  ["番茄","西红柿|蕃茄|洋柿子|番茄仔","蔬菜","i",20,0.9,0.2,4.0,0.5,5],
+  ["黄瓜","青瓜|胡瓜|刺瓜|王瓜","蔬菜","i",16,0.8,0.2,2.9,0.5,4.9],
+  ["胡萝卜","红萝卜|丁香萝卜|黄萝卜|红菜头","蔬菜","i",39,1.0,0.2,8.8,1.1,71],
+  ["白萝卜","萝卜|莱菔|菜头|心里美(近似)","蔬菜","i",23,0.9,0.1,5.0,1.0,61],
+  ["茄子","矮瓜|落苏|茄瓜","蔬菜","i",23,1.1,0.2,4.9,1.3,5.4],
+  ["青椒","柿子椒|菜椒|甜椒|灯笼椒|尖椒","蔬菜","i",22,1.0,0.2,5.4,1.4,3.3],
+  ["洋葱","球葱|圆葱|葱头|洋葱头","蔬菜","i",40,1.1,0.2,9.0,0.9,4.4],
+  ["南瓜","倭瓜|饭瓜|番瓜|金瓜","蔬菜","i",23,0.7,0.1,5.3,0.8,0.8],
+  ["冬瓜","白瓜|枕瓜|濮瓜","蔬菜","i",12,0.4,0.2,2.6,0.7,1.8],
+  ["苦瓜","凉瓜|癞葡萄|锦荔枝","蔬菜","i",22,1.0,0.1,4.9,1.4,2.5],
+  ["四季豆","豆角|菜豆|芸豆(嫩)|架豆","蔬菜","i",31,2.0,0.4,5.7,1.5,8.6],
+  ["芦笋","石刁柏|龙须菜|芦笋尖","蔬菜","i",22,1.4,0.1,4.9,1.9,3.1],
+  ["秋葵","羊角豆|黄秋葵|咖啡黄葵","蔬菜","i",45,2.0,0.1,11.0,3.9,3.9],
+  ["莲藕","藕|莲菜|藕节(误)","蔬菜","i",73,1.9,0.2,16.4,1.2,44],
+  ["蘑菇（鲜）","口蘑|双孢蘑菇|白蘑菇|圆蘑菇","菌藻","i",24,2.7,0.1,4.1,2.1,3],
+  ["香菇（鲜）","香蕈|冬菇|花菇|香信","菌藻","i",26,2.2,0.3,5.2,3.3,1.4],
+  ["金针菇","智力菇|朴菇|金菇","菌藻","i",32,2.4,0.4,6.0,2.7,4.3],
+  ["木耳（水发）","黑木耳|云耳|光木耳|木耳(泡发)","菌藻","i",27,1.5,0.2,6.0,2.6,8.5],
+  ["海带（水发）","昆布|江白菜|海草|海带丝","菌藻","i",14,1.2,0.1,2.1,0.5,8.6],
+  ["紫菜（干）","海苔|索菜|紫菜片","菌藻","i",250,26.7,1.1,44.1,21.6,710],
+  ["苹果","平安果|西洋苹果|红富士","水果","i",53,0.2,0.2,13.7,1.2,2],
+  ["香蕉","大蕉|蕉子|甘蕉","水果","i",93,1.4,0.2,22.0,1.2,1],
+  ["橙子","甜橙|脐橙|广柑|黄果","水果","i",48,0.8,0.2,11.1,0.6,1],
+  ["橘子","桔子|蜜橘|柑橘|柑子","水果","i",51,0.7,0.2,11.9,0.4,1.4],
+  ["葡萄","提子|蒲桃|草龙珠|红提","水果","i",45,0.4,0.3,10.3,0.4,2],
+  ["西瓜","夏瓜|寒瓜|西瓜瓤","水果","i",26,0.6,0.1,5.8,0.3,3],
+  ["草莓","洋莓|地莓|士多啤梨","水果","i",32,1.0,0.2,7.1,1.1,4],
+  ["梨","鸭梨|雪梨|白梨|香梨","水果","i",51,0.4,0.2,13.3,3.1,2.1],
+  ["桃","毛桃|水蜜桃|蟠桃","水果","i",51,0.9,0.1,12.2,1.3,5.7],
+  ["猕猴桃","奇异果|阳桃|毛桃子","水果","i",61,0.8,0.6,14.5,2.6,10],
+  ["芒果","檬果|望果|蜜望子","水果","i",35,0.6,0.2,8.3,1.3,1.6],
+  ["菠萝","凤梨|黄梨|露兜子","水果","i",44,0.5,0.1,10.8,1.3,0.8],
+  ["柚子","文旦|栾|沙田柚","水果","i",42,0.8,0.2,9.5,0.4,3],
+  ["蓝莓","越橘|蓝浆果|笃斯","水果","i",57,0.7,0.3,14.5,2.4,1],
+  ["火龙果","红龙果|青龙果|仙蜜果","水果","i",55,1.1,0.2,13.3,1.6,2.7],
+  ["哈密瓜","甜瓜|雪瓜|密瓜","水果","i",34,0.5,0.1,7.9,0.2,26.7],
+  ["樱桃","车厘子|朱樱|含桃","水果","i",46,1.1,0.2,10.2,0.3,8],
+  ["柠檬","洋柠檬|益母果|黎檬","水果","i",37,1.1,1.2,6.2,1.3,1.1],
+  ["榴莲","韶子|麝香猫果|榴梿","水果","i",150,2.6,3.3,28.3,1.7,2.9],
+  ["牛油果","鳄梨|油梨|酪梨","水果","i",171,2.0,15.3,7.4,2.1,7],
+  ["花生","花生米|落花生|长生果|地豆","坚果","i",574,24.8,44.3,21.7,5.5,4],
+  ["核桃","胡桃|羌桃|核桃仁","坚果","i",646,14.9,58.8,19.1,9.5,6],
+  ["瓜子（炒）","葵花籽|葵瓜子|瓜子仁","坚果","d",615,22.6,52.8,17.3,4.5,5],
+  ["开心果","无名子|阿月浑子|绿仁果","坚果","d",614,20.6,53.0,21.9,8.2,270],
+  ["巴旦木","扁桃仁|美国大杏仁|巴旦杏仁","坚果","d",578,22.5,45.4,21.0,10.0,2],
+  ["腰果","鸡腰果|介寿果|槚如树","坚果","d",559,17.3,36.7,41.6,3.6,252],
+  ["葡萄干","葡萄脯|提子干","零食","d",341,2.5,0.4,83.4,1.6,19.1],
+];
+
+const RAW_C = [   // 畜肉 · 禽肉 · 蛋类 · 乳类 · 水产
+  ["猪肉（瘦）","瘦猪肉|猪瘦肉|里脊肉|猪里脊","畜肉","i",143,20.3,6.2,1.5,0,58],
+  ["五花肉","猪五花|三层肉|肋条肉|肥瘦猪肉","畜肉","i",395,7.7,35.3,2.4,0,56],
+  ["猪排骨","排骨|肋排|小排|猪肋排","畜肉","i",278,16.7,23.1,0.7,0,62],
+  ["猪肝","猪肝脏|肝尖","畜肉","i",129,19.3,3.5,5.0,0,68],
+  ["猪蹄","猪脚|猪手|元蹄","畜肉","i",260,22.6,18.8,0,0,101],
+  ["培根","烟肉|咸肉片|烟熏肉","肉制品","d",181,22.3,9.0,1.6,0,1100],
+  ["火腿肠","火腿|热狗肠|香肠(火腿)","肉制品","d",212,14.0,10.4,15.6,0,771],
+  ["香肠（腊肠）","腊肠|风干肠|广式腊肠","肉制品","d",508,24.1,40.7,11.2,0,2309],
+  ["午餐肉","罐头午餐肉|梅林午餐肉","肉制品","d",229,12.0,15.0,12.0,0,981],
+  ["牛肉（瘦）","黄牛肉|瘦牛肉|牛里脊|牛肉","畜肉","i",125,20.2,4.2,1.2,0,58],
+  ["牛腩","牛腹肉|坑腩|牛肋条","畜肉","i",332,17.1,29.3,0,0,60],
+  ["羊肉","绵羊肉|山羊肉|羊腿肉","畜肉","i",203,19.0,14.1,0,0,69],
+  ["驴肉","毛驴肉|驴板肠(近似)","畜肉","i",116,21.5,3.2,0.4,0,46],
+  ["鸡胸肉","鸡脯肉|鸡柳|鸡大胸|鸡胸","禽肉","i",133,19.4,5.0,2.5,0,65],
+  ["鸡腿","琵琶腿|鸡大腿|鸡腿肉","禽肉","i",181,16.0,13.0,0,0,76],
+  ["鸡翅","鸡翅膀|翅中|鸡中翅","禽肉","i",194,17.4,11.8,4.6,0,50],
+  ["鸭肉","鸭子肉|麻鸭肉|鸭腿","禽肉","i",240,15.5,19.7,0.2,0,69],
+  ["烤鸭","北京烤鸭|烧鸭|片皮鸭","禽肉","d",436,16.6,38.4,6.0,0,63],
+  ["鸡蛋","蛋|鸡子|全蛋|土鸡蛋|洋鸡蛋","蛋类","i",144,13.3,8.8,2.8,0,131],
+  ["鸡蛋清","蛋白|蛋清|鸡子白","蛋类","i",60,11.6,0.1,3.1,0,79],
+  ["鸡蛋黄","蛋黄|鸡子黄","蛋类","i",328,15.2,28.2,3.4,0,54],
+  ["鹌鹑蛋","鹑鸟蛋|鹌鹑卵","蛋类","i",160,12.8,11.1,2.1,0,106],
+  ["茶叶蛋","茶蛋|茶叶卤蛋","蛋类","d",144,13.0,9.0,3.0,0,800],
+  ["卤蛋","卤鸡蛋|酱蛋","蛋类","d",165,13.5,11.5,3.0,0,1100],
+  ["牛奶","纯牛奶|鲜奶|全脂牛奶|牛乳","乳类","d",65,3.3,3.6,4.9,0,37],
+  ["酸奶","优酪乳|发酵乳|老酸奶","乳类","d",72,2.8,3.4,9.3,0,34],
+  ["奶酪","芝士|干酪|起司","乳类","d",328,25.7,23.5,3.5,0,584],
+  ["奶粉（全脂）","全脂奶粉|奶粉","乳类","i",478,20.1,21.2,51.7,0,260],
+  ["三文鱼","鲑鱼|大马哈鱼|撒蒙鱼","水产","i",139,17.2,7.8,0,0,60],
+  ["鲈鱼","花鲈|寨花|鲈子鱼","水产","i",105,18.6,3.4,0,0,144],
+  ["草鱼","鲩鱼|草鲩|草根鱼","水产","i",113,16.6,5.2,0,0,46],
+  ["带鱼","刀鱼|牙带鱼|裙带鱼","水产","i",127,17.7,4.9,3.1,0,150],
+  ["黄花鱼","黄鱼|大黄鱼|小黄鱼","水产","i",97,17.7,2.5,0.8,0,120],
+  ["巴沙鱼","龙利鱼|鲶鱼片|无刺鱼柳","水产","i",90,15.0,3.0,0,0,80],
+  ["虾","虾仁|基围虾|对虾|明虾|海虾","水产","i",93,18.6,0.8,2.8,0,165],
+  ["螃蟹","蟹|河蟹|海蟹|大闸蟹|梭子蟹","水产","i",103,17.5,2.6,2.3,0,193],
+  ["鱿鱼","柔鱼|句公|鱿鱼须","水产","i",84,17.4,1.6,0,0,134],
+  ["扇贝","海扇|干贝(鲜)|带子","水产","i",60,11.1,0.6,2.6,0,339],
+  ["蛤蜊","花甲|蚬子|沙白","水产","i",62,10.1,1.1,2.8,0,425],
+  ["鱼豆腐","鱼糜豆腐|鱼豆腐串","速食","d",152,10.0,8.0,10.0,0,700],
+  ["蟹棒","蟹肉棒|模拟蟹肉|蟹味棒","速食","d",106,8.0,1.0,15.0,0,700],
+];
+
+const RAW_D = [   // 速食 · 小吃 · 快餐 · 成品菜 · 甜点零食 · 饮品 · 酒类 · 油脂调味
+  ["方便面（油炸）","方便面|泡面|即食面|公仔面|泡面饼","速食","d",472,9.5,21.1,61.6,0.9,1144],
+  ["方便面（非油炸）","非油炸泡面|非油炸方便面|干拌面","速食","d",350,10.0,3.0,70.0,2.0,900],
+  ["饺子（猪肉馅）","饺子|水饺|猪肉水饺|速冻水饺","速食","d",240,8.5,10.5,27.0,1.9,460],
+  ["馄饨","云吞|抄手|扁食","速食","d",190,7.0,6.5,25.0,1.2,420],
+  ["小笼包","汤包|灌汤包|小笼汤包","速食","d",240,8.0,9.0,30.0,1.5,450],
+  ["包子（猪肉馅）","包子|肉包|肉包子|猪肉包","速食","d",230,7.5,8.5,31.0,1.7,420],
+  ["包子（素馅）","素包|菜包|素包子","速食","d",195,5.5,5.0,32.0,2.2,380],
+  ["螺蛳粉","螺狮粉|柳州螺蛳粉|螺螄粉","速食","d",130,4.0,3.5,21.0,1.2,700],
+  ["麻辣烫","麻辣烫(素)|冒菜(近似)","成品菜","d",120,5.0,6.0,11.0,1.5,650],
+  ["关东煮","关东煮串|关东煮(混合)","速食","d",120,6.0,6.0,10.0,0.8,900],
+  ["火锅（涮肉菜）","火锅|涮锅|打边炉","成品菜","d",180,8.0,12.0,8.0,1.5,900],
+  ["油条","油炸鬼|油条(1根约60g)","小吃","d",388,6.9,17.6,51.0,0.9,585],
+  ["烧饼","芝麻烧饼|火烧","小吃","d",326,8.0,10.0,51.0,2.0,500],
+  ["手抓饼","葱抓饼|抓饼|葱油饼","小吃","d",300,7.0,14.0,37.0,1.5,600],
+  ["鸡蛋灌饼","灌饼|鸡蛋饼(灌)","小吃","d",280,8.5,13.0,32.0,1.5,600],
+  ["煎饼果子","煎饼|杂粮煎饼|天津煎饼","小吃","d",300,8.0,12.0,38.0,2.0,550],
+  ["肉夹馍","腊汁肉夹馍|馍夹肉|中式汉堡","小吃","d",320,12.0,14.0,36.0,1.5,650],
+  ["凉皮","酿皮|面皮|陕西凉皮","小吃","d",120,5.0,1.5,22.0,0.6,450],
+  ["肠粉","布拉肠|广东肠粉|蒸粉","小吃","d",130,5.0,3.0,21.0,0.6,500],
+  ["臭豆腐","油炸臭豆腐|长沙臭豆腐","小吃","d",130,8.0,7.0,9.0,1.0,800],
+  ["烤冷面","东北烤冷面","小吃","d",190,7.0,8.0,24.0,1.0,600],
+  ["炸串","烤串|炸串(混合)|烧烤串","小吃","d",280,12.0,18.0,16.0,1.5,700],
+  ["汉堡","汉堡包|牛肉汉堡|鸡腿堡","快餐","d",295,15.0,13.0,30.0,1.5,500],
+  ["炸鸡（带皮）","炸鸡|炸鸡块|炸鸡腿|肯德基炸鸡","快餐","d",279,20.0,18.0,8.0,0.5,600],
+  ["炸鸡翅","奥尔良鸡翅|炸翅中|香辣鸡翅","快餐","d",281,20.5,18.5,8.0,0.4,650],
+  ["薯条","炸薯条|快餐薯条|薯条(袋装误)","快餐","d",298,4.0,15.0,37.0,3.0,300],
+  ["鸡米花","鸡块|鸡米花(裹粉)|劲爆鸡米花","快餐","d",254,15.0,14.0,18.0,1.0,600],
+  ["披萨","比萨|意式馅饼|披萨饼","快餐","d",266,11.0,10.0,33.0,2.3,598],
+  ["三明治","火腿三明治|三文治|总汇三明治","快餐","d",250,10.0,10.0,30.0,2.0,600],
+  ["热狗","热狗面包|香肠面包","快餐","d",290,10.0,17.0,24.0,1.0,800],
+  ["蔬菜沙拉","沙拉|蔬菜沙拉(无酱)|轻食沙拉","成品菜","d",60,2.0,4.0,4.0,1.5,250],
+  ["薯片","土豆片|袋装薯片|乐事薯片","零食","d",548,7.0,37.6,47.8,4.4,508],
+  ["番茄炒蛋","西红柿炒鸡蛋|番茄鸡蛋|西红柿炒蛋","成品菜","d",86,4.4,5.7,5.2,0.8,380],
+  ["青椒肉丝","尖椒肉丝|青椒炒肉","成品菜","d",130,9.0,8.0,5.0,1.2,500],
+  ["鱼香肉丝","鱼香肉丝(川)|鱼香肉丝盖饭","成品菜","d",145,9.0,9.0,7.0,1.0,650],
+  ["宫保鸡丁","宫爆鸡丁|宫保鸡丁(川)","成品菜","d",180,12.0,9.0,12.0,1.2,480],
+  ["麻婆豆腐","麻辣豆腐|麻婆豆腐(川)","成品菜","d",130,8.0,8.0,7.0,1.5,600],
+  ["回锅肉","回锅肉(川)|灯盏窝","成品菜","d",380,12.0,34.0,6.0,0.8,600],
+  ["糖醋里脊","糖醋肉|咕咾肉(近似)","成品菜","d",270,12.0,15.0,22.0,0.5,500],
+  ["红烧肉","东坡肉|红烧猪肉|红烧五花肉","成品菜","d",475,13.0,42.0,8.0,0,500],
+  ["红烧鸡块","烧鸡块|红烧鸡","成品菜","d",200,15.0,13.0,6.0,0.5,550],
+  ["水煮鱼","水煮鱼片|沸腾鱼","成品菜","d",190,14.0,13.0,4.0,0.8,700],
+  ["酸菜鱼","酸菜鱼片|老坛酸菜鱼","成品菜","d",120,11.0,7.0,4.0,1.0,900],
+  ["清蒸鲈鱼","蒸鲈鱼|清蒸鱼(近似)","成品菜","d",105,18.6,3.4,0,0,144],
+  ["排骨汤","骨汤|猪骨汤","成品菜","d",45,3.0,3.0,1.5,0.2,400],
+  ["鸡汤","清炖鸡汤|老母鸡汤|炖鸡汤","成品菜","d",30,2.5,2.0,0.5,0,350],
+  ["炒土豆丝","醋溜土豆丝|酸辣土豆丝|土豆丝","成品菜","d",120,2.0,6.0,15.0,1.0,500],
+  ["蒜蓉西兰花","蒜茸西兰花|白灼西兰花(近似)","成品菜","d",90,3.5,5.0,6.0,2.5,400],
+  ["清炒时蔬","炒青菜|清炒蔬菜|炒时蔬","成品菜","d",70,2.5,4.5,5.0,1.8,400],
+  ["干煸豆角","干煸四季豆|干煸豆角(川)","成品菜","d",150,3.0,11.0,9.0,2.5,600],
+  ["凉拌黄瓜","拍黄瓜|蒜泥黄瓜|蓑衣黄瓜","成品菜","d",70,1.0,5.0,5.5,0.7,500],
+  ["拌木耳","凉拌黑木耳|凉拌木耳","成品菜","d",90,2.5,6.0,7.0,3.0,600],
+  ["皮蛋豆腐","皮蛋拌豆腐|凉拌皮蛋豆腐","成品菜","d",110,7.0,6.5,5.0,0.6,600],
+  ["炒饭","蛋炒饭|扬州炒饭|炒米饭","成品菜","d",186,5.0,6.5,26.0,0.8,350],
+  ["皮蛋瘦肉粥","瘦肉粥|皮蛋粥|广东粥","成品菜","d",65,3.0,1.5,10.5,0.3,250],
+  ["紫菜蛋花汤","紫菜汤|蛋花汤","成品菜","d",25,1.5,1.0,2.0,0.5,400],
+  ["蛋糕","奶油蛋糕|生日蛋糕|戚风蛋糕","甜点","d",348,8.6,13.9,51.3,0.4,67],
+  ["饼干（苏打）","苏打饼|咸饼干|梳打饼","甜点","d",408,8.4,7.7,76.2,0.2,500],
+  ["曲奇饼干","曲奇|牛油曲奇|黄油曲奇","甜点","d",546,5.6,31.6,59.1,0.2,300],
+  ["蛋挞","葡式蛋挞|蛋塔","甜点","d",300,6.0,17.0,31.0,0.5,200],
+  ["麻花","天津麻花|大麻花","甜点","d",527,8.3,31.5,53.0,1.5,200],
+  ["巧克力","朱古力|黑巧克力|牛奶巧克力","零食","d",586,4.3,40.1,53.4,1.5,112],
+  ["冰淇淋","冰激凌|雪糕|冰淇凌|甜筒","甜点","d",207,2.4,11.0,25.9,0,54],
+  ["果冻","果冻杯|蒟蒻果冻","零食","d",60,0.3,0.1,14.0,0.2,30],
+  ["布丁","焦糖布丁|鸡蛋布丁","甜点","d",130,3.0,4.0,20.0,0.1,80],
+  ["可乐","可口可乐|汽水|肥宅快乐水|碳酸饮料","饮品","d",43,0,0,10.6,0,4],
+  ["雪碧","七喜|柠檬汽水|雪碧汽水","饮品","d",43,0,0,11.0,0,10],
+  ["奶茶（含糖）","奶茶|珍珠奶茶|波霸奶茶|全糖奶茶","饮品","d",75,1.2,2.5,12.0,0,40],
+  ["奶茶（无糖）","无糖奶茶|纯茶加奶|不加糖奶茶","饮品","d",30,1.5,1.5,2.5,0,40],
+  ["拿铁","拿铁咖啡|牛奶咖啡|Latte","饮品","d",55,3.0,3.0,4.0,0,40],
+  ["咖啡（无糖）","美式咖啡|黑咖啡|咖啡|美式","饮品","d",2,0.1,0,0.3,0,2],
+  ["橙汁","鲜橙汁|橙子汁|橙汁饮品","饮品","d",45,0.7,0.2,10.6,0.2,3],
+  ["苹果汁","苹果汁(纯)|鲜苹果汁","饮品","d",42,0.1,0.1,10.5,0.2,3],
+  ["运动饮料","宝矿力|脉动|电解质水|功能饮料","饮品","d",26,0,0,6.4,0,45],
+  ["无糖气泡水","气泡水|苏打水|零度气泡水","饮品","d",0,0,0,0,0,5],
+  ["蜂蜜","蜜糖|槐花蜜|蜂蜜水(含蜜)","调味","i",321,0.4,1.9,75.6,0,0.3],
+  ["啤酒","生啤|扎啤|啤酒(听装)","酒类","d",43,0.5,0,3.6,0,4],
+  ["红酒","葡萄酒|干红|红葡萄酒","酒类","d",85,0.1,0,2.6,0,4],
+  ["白酒（52度）","白酒|高度白酒|烧酒|二锅头","酒类","d",298,0,0,0,0,1],
+  ["鸡尾酒","调制酒|预调酒|RIO","酒类","d",120,0.1,0,10.0,0,5],
+  ["植物油","食用油|大豆油|花生油|菜籽油|玉米油|色拉油","油脂","i",899,0,99.9,0,0,0],
+  ["猪油","荤油|大油|板油","油脂","i",897,0,99.6,0,0,0],
+  ["黄油","牛油|动物奶油|黄油块","油脂","i",888,1.4,98.0,0,0,40],
+  ["芝麻酱","麻酱|芝麻酱(调味)","调味","i",618,19.2,52.7,22.7,5.9,38],
+  ["酱油","生抽|老抽|豉油","调味","i",63,5.6,0.1,10.1,0.2,5757],
+  ["白糖","白砂糖|砂糖|糖|绵白糖","调味","i",400,0.1,0,99.9,0,0],
+];
+
+// 由紧凑数组展开为对象，name 同时作为唯一 id（保证历史数据可迁移）
+const FOODS = [].concat(RAW_A, RAW_B, RAW_C, RAW_D).map(r => ({
+  name: r[0],
+  alias: r[1] ? r[1].split("|") : [],
+  cat: r[2],
+  type: r[3],
+  kcal: r[4], protein: r[5], fat: r[6], carbs: r[7], fiber: r[8], sodium: r[9]
+}));
+const FOOD_MAP = {};
+FOODS.forEach(f => { FOOD_MAP[f.name] = f; });
+function findFood(name){
+  if (FOOD_MAP[name]) return FOOD_MAP[name];
+  const hit = FOODS.find(f => f.alias.indexOf(name) >= 0);
+  return hit || null;
+}
+
+/* ---------- 烹饪工艺 ----------
+   oil / sugar / salt 为「每 100g 食材」的默认加入量（克），用户可手动修改 */
+const METHODS = [
+  {id:"raw",    name:"生食",        short:"（生）", verb:"",   oil:0,    sugar:0,   salt:0,   tip:"水果、即食食材"},
+  {id:"cold",   name:"凉拌",        short:"凉拌",   verb:"拌",  oil:2.0,  sugar:0.5, salt:1.0, tip:"含凉拌汁用油"},
+  {id:"steam",  name:"蒸",          short:"蒸",     verb:"蒸",  oil:0.3,  sugar:0,   salt:0.8, tip:"几乎不额外加油"},
+  {id:"boil",   name:"煮 / 炖 / 汆", short:"煮",     verb:"煮",  oil:0.8,  sugar:0,   salt:1.0, tip:"汤菜按实际食用量记"},
+  {id:"stir",   name:"炒",          short:"炒",     verb:"炒",  oil:4.0,  sugar:0.5, salt:1.0, tip:"中式家常炒制"},
+  {id:"pan",    name:"煎",          short:"煎",     verb:"煎",  oil:5.0,  sugar:0,   salt:0.8, tip:"平底锅少油煎制"},
+  {id:"deep",   name:"炸",          short:"炸",     verb:"炸",  oil:12.0, sugar:0,   salt:0.8, tip:"吸油率约 12%"},
+  {id:"roast",  name:"烤",          short:"烤",     verb:"烤",  oil:2.0,  sugar:0,   salt:1.0, tip:"烤箱 / 炭火烤制"},
+  {id:"braise", name:"红烧 / 糖醋",  short:"红烧",   verb:"烧",  oil:5.0,  sugar:5.0, salt:1.6, tip:"含糖与酱油，热量偏高"},
+];
+const METHOD_MAP = {};
+METHODS.forEach(m => { METHOD_MAP[m.id] = m; });
+
+// [名称, MET]
+const EXERCISES = [
+  ["散步（慢速）",3.0],["快走",5.0],["慢跑（8 km/h）",7.5],["快跑（10 km/h 以上）",10.0],
+  ["骑自行车（休闲）",6.0],["骑自行车（快速）",8.0],["游泳（自由泳）",8.0],["跳绳",11.0],
+  ["瑜伽",3.0],["力量训练（健身房）",5.0],["篮球",8.0],["足球",8.0],
+  ["羽毛球",5.5],["乒乓球",4.0],["网球",7.0],["爬山/徒步",6.5],
+  ["爬楼梯",8.0],["椭圆机",5.0],["有氧健身操",7.0],["拉伸/太极",2.5],["做家务",3.0],
+  ["广场舞",4.5],["划船机",7.0],["拳击/搏击操",9.0],["攀岩（室内）",8.0],["滑雪",7.0],
+];
+
+const MEAL_LABELS = {breakfast:"早餐",lunch:"午餐",dinner:"晚餐",snack:"加餐"};
+
+/* ================= 状态 ================= */
+const DEFAULT_STATE = {
+  version: 2,
+  gender: "male", age: 30, height: 170, weight: 65, activity: 1.55,
+  entries: [],     // {uid, meal, kind:"dish"|"combo", items:[{fid,grams}], methodId, oil, sugar, salt}
+  exercises: []    // {uid, exIdx, minutes}
+};
+// 旧版记录的食物顺序（v1 数据迁移用）——必须声明在 loadState() 执行之前
+const LEGACY_NAMES = [
+  "米饭（蒸）","馒头","面条（煮）","全麦面包","白面包","燕麦片","玉米（鲜）","红薯","土豆","炒饭",
+  "饺子（猪肉馅）","包子（猪肉馅）","煎饼果子","螺蛳粉","麻辣烫","皮蛋瘦肉粥","鸡蛋","牛奶","酸奶","奶酪",
+  "豆浆","鸡胸肉","鸡腿","猪肉（瘦）","五花肉","红烧肉","牛肉（瘦）","羊肉","宫保鸡丁","三文鱼",
+  "鲈鱼","虾","清蒸鲈鱼","豆腐","麻婆豆腐","西兰花","菠菜","生菜","番茄","番茄炒蛋",
+  "黄瓜","胡萝卜","大白菜","青椒","蘑菇（鲜）","紫菜蛋花汤","苹果","香蕉","橙子","葡萄",
+  "西瓜","草莓","花生","核桃","薯片","巧克力","蛋糕","冰淇淋","汉堡","披萨",
+  "可乐","奶茶（含糖）","咖啡（无糖）","橙汁","啤酒","红酒"
+];
+
+// 读取历史记录；即使旧数据迁移出错，也不影响页面正常启动
+let state;
+try { state = loadState(); }
+catch (e) { state = deepClone(DEFAULT_STATE); }
+
+// 纯数据深拷贝：优先用浏览器原生 structuredClone，老内核 / 内嵌 WebView 回退到 JSON 方案
+function deepClone(o){
+  if(typeof structuredClone === "function"){
+    try { return structuredClone(o); } catch(e){}
+  }
+  return JSON.parse(JSON.stringify(o));
+}
+
+function loadState(){
+  let raw = null;
+  try{ raw = JSON.parse(localStorage.getItem("calorieTrackerState") || "null"); }catch(e){}
+  if(!raw) return deepClone(DEFAULT_STATE);
+  const s = Object.assign(deepClone(DEFAULT_STATE), raw);
+  s.entries = raw.entries ? raw.entries : migrateLegacyFoods(raw.foods || []);
+  s.exercises = raw.exercises || [];
+  s.version = 2;
+  return s;
+}
+function migrateLegacyFoods(old){
+  const out = [];
+  old.forEach(o=>{
+    const name = LEGACY_NAMES[o.foodIdx];
+    if(!name) return;
+    const f = findFood(name);
+    if(!f) return;
+    out.push({uid:uid(), meal:o.meal, kind:"dish", items:[{fid:f.name, grams:o.grams}],
+              methodId:null, oil:null, sugar:null, salt:null});
+  });
+  return out;
+}
+function saveState(){
+  try{ localStorage.setItem("calorieTrackerState", JSON.stringify(state)); }catch(e){}
+}
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function round1(n){ return Math.round(n*10)/10; }
+
+/* ================= 计算逻辑 ================= */
+function calcTDEE(){
+  const {gender,age,height,weight,activity} = state;
+  const w=+weight||0, h=+height||0, a=+age||0;
+  if(!w||!h||!a) return 0;
+  const bmr = gender==="male"
+    ? 10*w + 6.25*h - 5*a + 5
+    : 10*w + 6.25*h - 5*a - 161;
+  return Math.round(bmr * (+state.activity||1.2));
+}
+
+// 工艺默认调味：每 100g 食材的用油/糖/盐（克）
+function seasonDefaults(methodId, grams){
+  const m = METHOD_MAP[methodId] || METHOD_MAP.raw;
+  const k = (grams||0)/100;
+  return { oil: round1(m.oil*k), sugar: round1(m.sugar*k), salt: round1(m.salt*k) };
+}
+function resolveSeason(e){
+  const grams = (e.items||[]).reduce((s,it)=>s+(it.grams||0),0);
+  const d = seasonDefaults(e.methodId, grams);
+  return {
+    oil: e.oil==null ? d.oil : e.oil,
+    sugar: e.sugar==null ? d.sugar : e.sugar,
+    salt: e.salt==null ? d.salt : e.salt,
+    grams: grams
+  };
+}
+
+// 一条记录的营养合计：食材本体 + 工艺加入的油/糖/盐
+function entryNutri(e){
+  const t = {kcal:0,protein:0,fat:0,carbs:0,fiber:0,sodium:0};
+  (e.items||[]).forEach(it=>{
+    const f = FOOD_MAP[it.fid]; if(!f) return;
+    const k = (it.grams||0)/100;
+    t.kcal += f.kcal*k; t.protein += f.protein*k; t.fat += f.fat*k;
+    t.carbs += f.carbs*k; t.fiber += f.fiber*k; t.sodium += f.sodium*k;
+  });
+  if(e.kind === "combo"){
+    const s = resolveSeason(e);
+    t.kcal += s.oil*9 + s.sugar*4;
+    t.fat += s.oil; t.carbs += s.sugar;
+    t.sodium += s.salt*393;   // 1 g 食盐约含钠 393 mg
+  }
+  return t;
+}
+function seasonKcal(e){
+  if(e.kind !== "combo") return 0;
+  const s = resolveSeason(e);
+  return s.oil*9 + s.sugar*4;
+}
+
+// 自动生成菜名：蔬菜类前置、蛋白类作主料，如「芹菜炒牛肉」
+function stripParen(name){ return name.replace(/（[^）]*）/g,""); }
+function dishName(e){
+  const items = (e.items||[]).filter(it=>FOOD_MAP[it.fid]);
+  if(!items.length) return "未知食物";
+  if(e.kind === "dish") return FOOD_MAP[items[0].fid].name;
+  const m = METHOD_MAP[e.methodId] || METHOD_MAP.raw;
+  const parts = items.map(it=>({name: stripParen(FOOD_MAP[it.fid].name), grams: it.grams, cat: FOOD_MAP[it.fid].cat}));
+  if(parts.length === 1) return `${parts[0].name}（${m.name}）`;
+  if(m.id === "raw" || m.id === "cold") return `${parts.map(p=>p.name).join("、")}（${m.name}）`;
+  const isVeg = p => p.cat === "蔬菜" || p.cat === "菌藻";
+  const sorted = parts.slice().sort((a,b)=>b.grams-a.grams);
+  const tail = parts.some(isVeg) ? (sorted.find(p=>!isVeg(p)) || sorted[0]) : sorted[0];
+  const heads = parts.filter(p=>p!==tail).map(p=>p.name);
+  return `${heads.join("、")}${m.verb}${tail.name}`;
+}
+
+function totals(){
+  const t = {kcal:0,protein:0,fat:0,carbs:0,fiber:0,sodium:0,burn:0,seasonKcal:0};
+  state.entries.forEach(e=>{
+    const n = entryNutri(e);
+    t.kcal+=n.kcal; t.protein+=n.protein; t.fat+=n.fat;
+    t.carbs+=n.carbs; t.fiber+=n.fiber; t.sodium+=n.sodium;
+    t.seasonKcal += seasonKcal(e);
+  });
+  state.exercises.forEach(e=>{
+    const met = EXERCISES[e.exIdx][1];
+    t.burn += met * 3.5 * (+state.weight||0) / 200 * e.minutes;
+  });
+  for(const k in t) t[k] = Math.round(t[k]);
+  return t;
+}
+function recommend(tdee){
+  return {
+    protein: tdee*0.15/4,   // 15% 供能
+    fat:     tdee*0.25/9,   // 25% 供能
+    carbs:   tdee*0.575/4,  // 57.5% 供能
+    fiber:   25,            // g/天
+    sodium:  2000           // mg/天 上限
+  };
+}
+
+/* ================= 渲染 ================= */
+const $ = id => document.getElementById(id);
+function fmt(n){ return Math.round(n).toLocaleString("zh-CN"); }
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+let mode = "quick";
+let basket = [];          // 待搭配食材 [{fid, grams}]
+let methodId = "stir";
+let editingUid = null;    // 正在编辑的搭配记录
+let seasonTouched = { oil:false, sugar:false, salt:false };
+const SEASON_INPUTS = { oil:"oilG", sugar:"sugarG", salt:"saltG" };
+
+function renderAll(){
+  renderTDEE(); renderFoods(); renderExercises(); renderSummary();
+  updateSeasonDefaults(); renderPreview();
+  saveState();
+}
+
+/* --- 餐次 --- */
+function currentMeal(){ return $("mealSelect").value; }
+
+/* --- 模式切换 --- */
+document.querySelectorAll(".tab").forEach(btn=>{
+  btn.addEventListener("click", ()=>setMode(btn.dataset.mode));
+});
+function setMode(m){
+  mode = m;
+  document.querySelectorAll(".tab").forEach(b=>{
+    const on = b.dataset.mode === m;
+    b.classList.toggle("on", on);
+    b.setAttribute("aria-selected", on ? "true" : "false");
+  });
+  $("quickPanel").hidden = m !== "quick";
+  $("comboPanel").hidden = m !== "combo";
+}
+
+/* --- 搜索（两个入口共用一套逻辑） --- */
+function makeSearch(inputId, boxId, onPick){
+  const input = $(inputId), box = $(boxId);
+  function render(q){
+    box.innerHTML = "";
+    if(!q){ box.classList.remove("open"); return; }
+    const hits = FOODS.filter(f =>
+      f.name.includes(q) || f.cat.includes(q) || f.alias.some(a=>a.includes(q))
+    ).slice(0,10);
+    if(!hits.length){
+      box.innerHTML = `<div class="no-result">没有找到「${escapeHtml(q)}」。换个关键词试试，或切到「搭配烹饪」自己组合食材。</div>`;
+      box.classList.add("open"); return;
+    }
+    hits.forEach(f=>{
+      const el = document.createElement("div");
+      el.className = "sug-item"; el.tabIndex = 0; el.setAttribute("role","option");
+      const direct = isDirect(f);
+      const aliasTxt = f.alias.length ? `<span class="sug-alias">别名：${escapeHtml(f.alias.slice(0,3).join(" / "))}</span>` : "";
+      el.innerHTML = `<span class="type-badge ${direct?'dish':'ing'}">${direct?'直接记录':'搭配工艺'}</span>
+        <span class="name">${escapeHtml(f.name)}</span>${aliasTxt}
+        <span class="cat">${f.cat}</span>
+        <span class="per"><b>${f.kcal}</b> <span>kcal / 100g</span></span>`;
+      const pick = ()=>onPick(f);
+      el.addEventListener("click", pick);
+      el.addEventListener("keydown", ev=>{ if(ev.key==="Enter") pick(); });
+      box.appendChild(el);
+    });
+    box.classList.add("open");
+  }
+  input.addEventListener("input", ()=>render(input.value.trim()));
+  input.addEventListener("focus", ()=>render(input.value.trim()));
+  input.clearSearch = ()=>{ input.value=""; box.innerHTML=""; box.classList.remove("open"); };
+  return input;
+}
+
+const search1 = makeSearch("foodSearch","suggestions", f=>{
+  if(isDirect(f)){ addDishEntry(f); }
+  else { addToBasket(f, 100); setMode("combo"); }
+});
+makeSearch("foodSearch2","suggestions2", f=>addToBasket(f, 100));
+
+// 成品菜、速食、饮品、水果等无需额外烹饪，可直接记录
+function isDirect(f){ return f.type === "dish" || f.cat === "水果" || f.cat === "饮品"; }
+
+document.addEventListener("click", e=>{
+  if(!e.target.closest(".search-box") && !e.target.closest(".suggestions")){
+    ["suggestions","suggestions2"].forEach(id=>$(id).classList.remove("open"));
+  }
+});
+
+function addDishEntry(f){
+  state.entries.push({
+    uid: uid(), meal: currentMeal(), kind: "dish",
+    items: [{ fid: f.name, grams: 100 }], methodId: null, oil: null, sugar: null, salt: null
+  });
+  search1.clearSearch();
+  renderAll();
+}
+function addToBasket(f, grams){
+  const ex = basket.find(b=>b.fid === f.name);
+  if(ex) ex.grams = Math.min(2000, ex.grams + grams);
+  else basket.push({ fid: f.name, grams });
+  $("foodSearch").value = ""; $("foodSearch2").value = "";
+  ["suggestions","suggestions2"].forEach(id=>$(id).classList.remove("open"));
+  renderBasket();
+}
+
+/* --- 食材篮子 --- */
+function totalGrams(){ return basket.reduce((s,b)=>s+(+b.grams||0),0); }
+function renderBasket(){
+  const box = $("basket");
+  box.innerHTML = "";
+  if(!basket.length){
+    const empty = document.createElement("div");
+    empty.className = "empty"; empty.style.width = "100%";
+    empty.textContent = "还没有食材 —— 在下面搜索添加，例如「芹菜 + 牛肉」";
+    box.appendChild(empty);
+  } else {
+    basket.forEach((b,i)=>{
+      const f = FOOD_MAP[b.fid]; if(!f) return;
+      const chip = document.createElement("div");
+      chip.className = "chip";
+      chip.innerHTML = `<span class="cname">${escapeHtml(f.name)}</span>
+        <input type="number" min="1" max="2000" value="${b.grams}" aria-label="${escapeHtml(f.name)} 克数">
+        <span class="unit">g</span>
+        <button class="x" type="button" aria-label="移除 ${escapeHtml(f.name)}">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>`;
+      chip.querySelector("input").addEventListener("change", ev=>{
+        b.grams = Math.min(2000, Math.max(1, +ev.target.value||1));
+        updateSeasonDefaults(); renderPreview();
+      });
+      chip.querySelector(".x").addEventListener("click", ()=>{
+        basket.splice(i,1); renderBasket(); updateSeasonDefaults(); renderPreview();
+      });
+      box.appendChild(chip);
+    });
+  }
+  renderMethods(); updateSeasonDefaults(); renderPreview();
+}
+
+/* --- 工艺 --- */
+function renderMethods(){
+  const box = $("methods");
+  box.innerHTML = "";
+  METHODS.forEach(m=>{
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "method" + (m.id === methodId ? " on" : "");
+    b.setAttribute("role","radio");
+    b.setAttribute("aria-checked", m.id === methodId ? "true" : "false");
+    b.innerHTML = `<b>${m.name}</b><span>${m.tip}</span>`;
+    b.addEventListener("click", ()=>{
+      methodId = m.id;
+      seasonTouched = { oil:false, sugar:false, salt:false };
+      renderMethods(); updateSeasonDefaults(true); renderPreview();
+    });
+    box.appendChild(b);
+  });
+}
+
+/* --- 调味 --- */
+Object.keys(SEASON_INPUTS).forEach(k=>{
+  $(SEASON_INPUTS[k]).addEventListener("input", ()=>{ seasonTouched[k] = true; renderPreview(); });
+});
+function updateSeasonDefaults(force){
+  const total = totalGrams();
+  const d = seasonDefaults(methodId, total);
+  Object.keys(SEASON_INPUTS).forEach(k=>{
+    if(force || !seasonTouched[k]) $(SEASON_INPUTS[k]).value = d[k];
+  });
+  const m = METHOD_MAP[methodId] || METHOD_MAP.raw;
+  $("seasonNote").innerHTML = `按「${m.name}」与食材总重 ${total} g 自动估算（每 100 g 食材约 ${m.oil} g 油 / ${m.sugar} g 糖 / ${m.salt} g 盐），可手动改成实际用量。`;
+}
+
+/* --- 预览 --- */
+function currentEntry(){
+  return {
+    uid: editingUid || "preview",
+    meal: currentMeal(),
+    kind: "combo",
+    items: basket.map(b=>({ fid:b.fid, grams: +b.grams||0 })),
+    methodId: methodId,
+    oil: parseFloat($("oilG").value)||0,
+    sugar: parseFloat($("sugarG").value)||0,
+    salt: parseFloat($("saltG").value)||0
+  };
+}
+function renderPreview(){
+  const box = $("comboPreview");
+  if(!basket.length){
+    box.innerHTML = `<div class="pname">还没有选择食材</div>
+      <div class="pmeta">添加食材并选择工艺后，这里会实时算出这道菜的热量与营养。</div>`;
+    $("comboAdd").disabled = true;
+    return;
+  }
+  $("comboAdd").disabled = false;
+  const e = currentEntry();
+  const n = entryNutri(e);
+  const m = METHOD_MAP[methodId] || METHOD_MAP.raw;
+  const comp = basket.map(b=>`${FOOD_MAP[b.fid].name} ${b.grams}g`).join(" + ");
+  box.innerHTML = `
+    <div class="pname">${escapeHtml(dishName(e))}</div>
+    <div class="pmeta">${escapeHtml(comp)} ｜ 工艺：${m.name} ｜ 食材总重 ${totalGrams()} g（生重）</div>
+    <div class="pkcal"><b>${fmt(n.kcal)}</b><span>kcal（已含油 / 糖 / 盐估算）</span></div>
+    <div class="pstats">
+      <span>蛋白质 <i>${round1(n.protein)} g</i></span>
+      <span>脂肪 <i>${round1(n.fat)} g</i></span>
+      <span>碳水 <i>${round1(n.carbs)} g</i></span>
+      <span>膳食纤维 <i>${round1(n.fiber)} g</i></span>
+      <span>钠 <i>${fmt(n.sodium)} mg</i></span>
+    </div>`;
+}
+
+/* --- 记录 --- */
+$("comboAdd").addEventListener("click", ()=>{
+  if(!basket.length) return;
+  const e = currentEntry();
+  if(editingUid){
+    const i = state.entries.findIndex(x=>x.uid === editingUid);
+    if(i >= 0) state.entries[i] = Object.assign({}, e, { uid: editingUid });
+    resetCombo();
+  } else {
+    e.uid = uid();
+    state.entries.push(e);
+    resetCombo();
+  }
+  renderAll();
+});
+$("comboCancel").addEventListener("click", resetCombo);
+function resetCombo(){
+  editingUid = null;
+  basket = [];
+  seasonTouched = { oil:false, sugar:false, salt:false };
+  $("oilG").value = 0; $("sugarG").value = 0; $("saltG").value = 0;
+  $("comboCancel").hidden = true;
+  $("comboAdd").textContent = "加入今日记录";
+  renderBasket();
+}
+function startEdit(u){
+  const e = state.entries.find(x=>x.uid === u); if(!e) return;
+  editingUid = u;
+  basket = e.items.map(it=>({ fid: it.fid, grams: it.grams }));
+  methodId = e.methodId || "stir";
+  const d = seasonDefaults(methodId, totalGrams());
+  $("oilG").value = e.oil==null ? d.oil : e.oil;
+  $("sugarG").value = e.sugar==null ? d.sugar : e.sugar;
+  $("saltG").value = e.salt==null ? d.salt : e.salt;
+  seasonTouched = { oil: e.oil!=null, sugar: e.sugar!=null, salt: e.salt!=null };
+  $("mealSelect").value = e.meal;
+  $("comboCancel").hidden = false;
+  $("comboAdd").textContent = "保存修改";
+  setMode("combo");
+  renderBasket();
+  document.querySelector("#comboPanel").scrollIntoView({ behavior:"smooth", block:"start" });
+}
+
+function renderFoods(){
+  const box = $("foodList");
+  if(!state.entries.length){
+    box.innerHTML = `<div class="empty">还没有记录 —— 上面的搜索框可直接添加成品菜（如方便面、番茄炒蛋），或切到「搭配烹饪」把几种食材和工艺组合起来算。</div>`;
+    return;
+  }
+  box.innerHTML = "";
+  ["breakfast","lunch","dinner","snack"].forEach(meal=>{
+    const list = state.entries.filter(e=>e.meal === meal);
+    if(!list.length) return;
+    const sum = list.reduce((s,e)=>s+entryNutri(e).kcal, 0);
+    const head = document.createElement("div");
+    head.className = "meal-head";
+    head.innerHTML = `<span class="mname">${MEAL_LABELS[meal]}</span><span class="mkcal">${fmt(sum)} kcal</span>`;
+    box.appendChild(head);
+    list.forEach(e=>box.appendChild(logRow(e)));
+  });
+}
+
+function logRow(e){
+  const n = entryNutri(e);
+  const isDish = e.kind === "dish";
+  const m = e.methodId ? METHOD_MAP[e.methodId] : null;
+  const el = document.createElement("div");
+  el.className = "log-item";
+
+  const main = document.createElement("div");
+  main.className = "log-main";
+  const nameRow = document.createElement("div");
+  nameRow.className = "log-name";
+  nameRow.innerHTML = `<span class="name">${escapeHtml(dishName(e))}</span>
+    <span class="tag ${e.meal}">${MEAL_LABELS[e.meal]}</span>
+    ${isDish ? "" : `<span class="tag method">${m ? m.short : ""}</span>`}`;
+  const comp = document.createElement("div");
+  comp.className = "comp";
+  if(isDish){
+    const f = FOOD_MAP[e.items[0].fid];
+    comp.textContent = `${f ? f.cat : ""} · 成品（数值已含烹饪影响）`;
+  } else {
+    const parts = e.items.filter(it=>FOOD_MAP[it.fid])
+      .map(it=>`${FOOD_MAP[it.fid].name} ${it.grams}g`).join(" + ");
+    const s = resolveSeason(e);
+    const season = [`用油 ${round1(s.oil)} g`];
+    if(s.sugar > 0) season.push(`加糖 ${round1(s.sugar)} g`);
+    season.push(`盐 ${round1(s.salt)} g`);
+    comp.textContent = `${parts} · 工艺：${m ? m.name : "—"} · ${season.join(" / ")}`;
+  }
+  main.appendChild(nameRow); main.appendChild(comp);
+  el.appendChild(main);
+
+  if(isDish){
+    const gi = document.createElement("input");
+    gi.className = "num-input"; gi.type = "number"; gi.min = 1; gi.max = 2000;
+    gi.value = e.items[0].grams;
+    gi.setAttribute("aria-label", `${FOOD_MAP[e.items[0].fid].name} 克数`);
+    gi.addEventListener("change", ev=>{
+      e.items[0].grams = Math.min(2000, Math.max(1, +ev.target.value||1));
+      renderAll();
+    });
+    el.appendChild(gi);
+    const unit = document.createElement("span");
+    unit.className = "unit"; unit.textContent = "g";
+    el.appendChild(unit);
+  }
+
+  const kc = document.createElement("span");
+  kc.className = "kcal";
+  kc.innerHTML = `${fmt(n.kcal)}<span style="font-weight:500;color:var(--ink-3);font-size:11px"> kcal</span>`;
+  el.appendChild(kc);
+
+  if(!isDish){
+    const eb = document.createElement("button");
+    eb.className = "icon-btn"; eb.title = "编辑食材与工艺";
+    eb.setAttribute("aria-label", `编辑 ${dishName(e)}`);
+    eb.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M14 5l4 4"/></svg>`;
+    eb.addEventListener("click", ()=>startEdit(e.uid));
+    el.appendChild(eb);
+  }
+
+  const db = document.createElement("button");
+  db.className = "icon-btn danger";
+  db.setAttribute("aria-label", `删除 ${dishName(e)}`);
+  db.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>`;
+  db.addEventListener("click", ()=>{
+    state.entries = state.entries.filter(x=>x.uid !== e.uid);
+    renderAll();
+  });
+  el.appendChild(db);
+  return el;
+}
+
+/* --- 运动 --- */
+(function initExerciseSelect(){
+  const sel = $("exerciseSelect");
+  EXERCISES.forEach((e,i)=>{
+    const o = document.createElement("option");
+    o.value = i; o.textContent = `${e[0]}（MET ${e[1]}）`;
+    sel.appendChild(o);
+  });
+})();
+$("addExercise").addEventListener("click", ()=>{
+  const idx = +$("exerciseSelect").value;
+  const min = Math.min(480, Math.max(5, +$("exerciseMinutes").value||0));
+  if($("exerciseSelect").value === "" || !min){ $("exerciseSelect").focus(); return; }
+  state.exercises.push({ uid: uid(), exIdx: idx, minutes: min });
+  $("exerciseSelect").value = "";
+  renderAll();
+});
+function renderExercises(){
+  const box = $("exerciseList");
+  if(!state.exercises.length){
+    box.innerHTML = `<div class="empty">还没有记录运动 —— 选择项目并填写时长后点击「添加」</div>`;
+    return;
+  }
+  box.innerHTML = "";
+  state.exercises.forEach(e=>{
+    const [name, met] = EXERCISES[e.exIdx];
+    const kcal = Math.round(met*3.5*(+state.weight||0)/200*e.minutes);
+    const el = document.createElement("div");
+    el.className = "log-item";
+    el.innerHTML = `
+      <span class="name">${name}</span>
+      <span class="tag exercise">运动</span>
+      <input class="num-input" type="number" min="5" max="480" step="5" value="${e.minutes}" aria-label="${name} 的时长（分钟）">
+      <span class="unit">分钟</span>
+      <span class="kcal burn">−${fmt(kcal)}<span style="font-weight:500;color:var(--ink-3);font-size:11px"> kcal</span></span>
+      <button class="del" aria-label="删除 ${name}">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>
+      </button>`;
+    el.querySelector(".num-input").addEventListener("change", ev=>{
+      e.minutes = Math.min(480, Math.max(5, +ev.target.value||0)); renderAll();
+    });
+    el.querySelector(".del").addEventListener("click", ()=>{
+      state.exercises = state.exercises.filter(x=>x.uid !== e.uid); renderAll();
+    });
+    box.appendChild(el);
+  });
+}
+
+/* --- 总结 --- */
+function renderTDEE(){
+  const tdee = calcTDEE();
+  $("tdeeVal").innerHTML = tdee ? fmt(tdee)+"<small>kcal</small>" : "—<small>kcal</small>";
+}
+function renderSummary(){
+  const t = totals(), tdee = calcTDEE(), rec = recommend(tdee);
+  const net = t.kcal - t.burn;
+  const count = state.entries.length + state.exercises.length;
+  $("logCount").textContent = count ? `${state.entries.length} 项饮食 · ${state.exercises.length} 项运动` : "";
+
+  $("fIntake").innerHTML = fmt(t.kcal)+"<small>kcal</small>";
+  $("fBurn").innerHTML = fmt(t.burn)+"<small>kcal</small>";
+  $("fNet").innerHTML = fmt(net)+"<small>kcal</small>";
+  $("fTdee").innerHTML = tdee ? fmt(tdee)+"<small>kcal</small>" : "—<small>kcal</small>";
+  $("fSeason").innerHTML = "+"+fmt(t.seasonKcal)+"<small>kcal</small>";
+  $("intakeTotal").textContent = fmt(t.kcal);
+
+  const C = 402.1;
+  const bar = $("donutBar");
+  if(tdee > 0){
+    const ratio = Math.min(t.kcal/tdee, 1);
+    bar.style.strokeDashoffset = C*(1-ratio);
+    bar.classList.toggle("over", t.kcal > tdee*1.1);
+  } else { bar.style.strokeDashoffset = C; }
+
+  const v = $("verdict");
+  if(!count){
+    v.className = "verdict balanced";
+    v.innerHTML = `<b>开始记录</b><br>在左侧添加今天吃的东西和运动，这里会给出热量平衡结论。`;
+  } else if(!tdee){
+    v.className = "verdict balanced";
+    v.innerHTML = `<b>请先完善个人信息</b><br>填写年龄、身高、体重后才能计算建议摄入量。`;
+  } else {
+    const diff = net - tdee;
+    const pct = Math.round(Math.abs(diff)/tdee*100);
+    if(diff > tdee*0.05){
+      v.className = "verdict surplus";
+      v.innerHTML = `<b>热量盈余 +${fmt(diff)} kcal（超出建议 ${pct}%）</b><br>今天净摄入高于建议摄入量，若长期如此可能导致体重增加，可考虑增加运动或适当控制饮食。`;
+    } else if(diff < -tdee*0.05){
+      v.className = "verdict deficit";
+      v.innerHTML = `<b>热量缺口 −${fmt(-diff)} kcal（低于建议 ${pct}%）</b><br>今天净摄入低于建议摄入量${diff < -tdee*0.25 ? "，缺口偏大，注意不要长时间过度节食" : ""}。减脂期间适度缺口是合理的。`;
+    } else {
+      v.className = "verdict balanced";
+      v.innerHTML = `<b>热量基本平衡（与建议相差 ${fmt(Math.abs(diff))} kcal）</b><br>今天净摄入与建议摄入量接近，维持现状即可。`;
+    }
+  }
+  renderNutri(t, rec, t.kcal);
+}
+function pill(cls, text){ return `<span class="pill ${cls}">${text}</span>`; }
+function renderNutri(t, rec, intakeKcal){
+  const items = [];
+
+  const pRatio = intakeKcal ? t.protein*4/intakeKcal : 0;
+  const pPct = rec.protein ? t.protein/rec.protein : 0;
+  items.push({
+    name:"蛋白质", actual:t.protein, unit:"g",
+    advice: rec.protein ? `建议约 ${fmt(rec.protein)} g（10–20% 供能，当前 ${Math.round(pRatio*100)}%）` : "建议 10–20% 供能",
+    pct: pPct, status: pPct<0.8?["low","不足"]:pPct>1.2?["high","偏高"]:["ok","良好"]
+  });
+
+  const fRatio = intakeKcal ? t.fat*9/intakeKcal : 0;
+  items.push({
+    name:"脂肪", actual:t.fat, unit:"g",
+    advice: rec.fat ? `建议约 ${fmt(rec.fat)} g（20–30% 供能，当前 ${Math.round(fRatio*100)}%）` : "建议 20–30% 供能",
+    pct: rec.fat ? t.fat/rec.fat : 0,
+    status: fRatio>0.30?["high","超标"]:(fRatio<0.20 && intakeKcal>0)?["low","偏低"]:["ok","良好"]
+  });
+
+  const cRatio = intakeKcal ? t.carbs*4/intakeKcal : 0;
+  items.push({
+    name:"碳水化合物", actual:t.carbs, unit:"g",
+    advice: rec.carbs ? `建议约 ${fmt(rec.carbs)} g（50–65% 供能，当前 ${Math.round(cRatio*100)}%）` : "建议 50–65% 供能",
+    pct: rec.carbs ? t.carbs/rec.carbs : 0,
+    status: (cRatio<0.50 && intakeKcal>0)?["low","偏低"]:cRatio>0.65?["high","偏高"]:["ok","良好"]
+  });
+
+  items.push({
+    name:"膳食纤维", actual:t.fiber, unit:"g",
+    advice:`建议 ≥ ${rec.fiber} g/天`,
+    pct: t.fiber/rec.fiber,
+    status: t.fiber >= rec.fiber ? ["ok","达标"] : ["low","不足"]
+  });
+
+  items.push({
+    name:"钠", actual:t.sodium, unit:"mg",
+    advice:`建议 < ${rec.sodium} mg/天（约 5 g 盐）`,
+    pct: t.sodium/rec.sodium,
+    status: t.sodium > rec.sodium ? ["high","超标"] : ["ok","良好"]
+  });
+
+  $("nutriList").innerHTML = items.map(it=>{
+    const pct = Math.min(Math.round(it.pct*100), 100);
+    const cls = it.status[0]==="high" ? "danger" : it.status[0]==="low" ? "warn" : "";
+    return `<div class="nutri">
+      <div class="nutri-row">
+        <span class="n">${it.name}${pill(it.status[0], it.status[1])}</span>
+        <span class="r"><b>${fmt(it.actual)} ${it.unit}</b> ｜ ${it.advice}</span>
+      </div>
+      <div class="bar-track"><div class="bar-fill ${cls}" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join("");
+}
+
+/* ================= 个人信息交互 ================= */
+function bindGender(){
+  const m=$("gMale"), f=$("gFemale");
+  const set=g=>{
+    state.gender=g;
+    m.classList.toggle("on", g==="male");
+    f.classList.toggle("on", g==="female");
+    renderAll();
+  };
+  m.addEventListener("click",()=>set("male"));
+  f.addEventListener("click",()=>set("female"));
+  (state.gender==="female"?f:m).classList.add("on");
+}
+["age","height","weight","activity"].forEach(id=>{
+  $(id).addEventListener("change", ev=>{
+    state[id] = id==="activity" ? +ev.target.value : +ev.target.value;
+    renderAll();
+  });
+});
+
+/* ================= 初始化 ================= */
+$("todayDate").textContent = new Date().toLocaleDateString("zh-CN",{month:"long",day:"numeric",weekday:"long"});
+$("age").value=state.age; $("height").value=state.height; $("weight").value=state.weight;
+$("activity").value=state.activity;
+bindGender();
+renderBasket();
+renderAll();
+</script>
+</body>
+</html>
